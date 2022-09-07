@@ -30,8 +30,6 @@ function extractCoverageInformation (coverage, rootDir) {
       const lineCoverage = fileCoverage.getLineCoverage()
       const isAnyLineExecuted = Object.entries(lineCoverage).some(([, numExecutions]) => !!numExecutions)
 
-      fileCoverage.resetHits()
-
       return isAnyLineExecuted
     })
     .map(filename => filename.replace(`${rootDir}/`, ''))
