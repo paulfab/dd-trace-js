@@ -225,7 +225,7 @@ addHook({
     const { configs } = result
     configs.forEach(config => {
       skippableTests.forEach(({ suite }) => {
-        config.testMatch.push(`!**/${suite}`)
+        config.testMatch.push(`!**/${suite.replaceAll('../', '')}`)
       })
       config.testEnvironmentOptions._ddTestsToSkip = skippableTests
     })
