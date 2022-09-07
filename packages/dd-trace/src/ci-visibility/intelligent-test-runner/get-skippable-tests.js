@@ -48,9 +48,11 @@ function getSkippableTests ({
       }
     }
   })
+  log.error(`Request to skippable: ${data}`)
 
   request(data, options, (err, res) => {
     if (err) {
+      log.error(`Error in skippable: ${err}}`)
       done(err)
     } else {
       let skippableTests = []

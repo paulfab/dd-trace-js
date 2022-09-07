@@ -58,7 +58,9 @@ class Tracer extends NoopProxy {
         telemetry.start(config, this._pluginManager)
       }
 
-      if (config.isGitUploadEnabled) {
+      const isTestingFramework = process.argv.some(argv => argv.includes('.bin/jest'))
+
+      if (config.isGitUploadEnabled && isTestingFramework) {
         let onResponse, onError
         this._tracer._gitMetadataPromise = new Promise((resolve, reject) => {
           onResponse = resolve

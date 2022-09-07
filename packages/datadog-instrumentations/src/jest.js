@@ -262,7 +262,6 @@ addHook({
       onError = reject
     })
 
-    debugger
 
     const asyncResource = new AsyncResource('bound-anonymous-fn')
     asyncResource.runInAsyncScope(() => {
@@ -273,9 +272,8 @@ addHook({
       skippableTests = await skippableTestsRequestPromise
     } catch (e) {
       // ignore error
-      debugger
+      console.error('error in skippable promise', e)
     }
-    debugger
 
     return runCLI.apply(this, arguments)
   })
