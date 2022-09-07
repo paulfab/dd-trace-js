@@ -33,13 +33,12 @@ class Writer extends BaseWriter {
     options.hostname = this._url.hostname
     options.port = this._url.port
 
-    log.error(() => `Request to the coverage intake: ${safeJSONStringify(options)}`)
+    log.debug(() => `Request to the coverage intake: ${safeJSONStringify(options)}`)
 
-    request(form, options, (err, res) => {
-      log.error(`Response from the coverage intake: ${res}`)
+    request(form, options, (err) => {
       if (err) {
         log.error(err)
-        done()
+        done(err)
         return
       }
       done()
