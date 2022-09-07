@@ -11,6 +11,7 @@ const testErrCh = channel('ci:jest:test:err')
 const testCodeCoverageCh = channel('ci:jest:test:code-coverage')
 
 const skippableTestsCh = channel('ci:jest:test:skippable')
+const testSessionFinish = channel('ci:jest:test-session:finish')
 
 const {
   getTestSuitePath,
@@ -262,7 +263,6 @@ addHook({
       onError = reject
     })
 
-
     const asyncResource = new AsyncResource('bound-anonymous-fn')
     asyncResource.runInAsyncScope(() => {
       skippableTestsCh.publish({ onResponse, onError })
@@ -275,7 +275,13 @@ addHook({
       console.error('error in skippable promise', e)
     }
 
-    return runCLI.apply(this, arguments)
+    const res = await runCLI.apply(this, arguments)
+
+    asyncResource.runInAsyncScope(() => {
+      testSessionFinish.publish()
+    })
+
+    return res
   })
 
   cli.runCLI = wrapped.runCLI

@@ -96,6 +96,13 @@ class JestPlugin extends Plugin {
       span.finish()
     })
 
+    this.addSub('ci:jest:test-session:finish', () => {
+      this.tracer._exporter._writer.flush()
+      if (this.tracer._exporter._coverageWriter) {
+        this.tracer._exporter._coverageWriter.flush()
+      }
+    })
+
     this.addSub('ci:jest:test:skippable', ({ onResponse, onError }) => {
       if (!this.config.isAgentlessEnabled || !this.config.isIntelligentTestRunnerEnabled) {
         onResponse([])

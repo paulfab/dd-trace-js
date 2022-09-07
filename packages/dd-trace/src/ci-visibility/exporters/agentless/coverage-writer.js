@@ -36,12 +36,12 @@ class Writer extends BaseWriter {
     log.error(() => `Request to the coverage intake: ${safeJSONStringify(options)}`)
 
     request(form, options, (err, res) => {
+      log.error(`Response from the coverage intake: ${res}`)
       if (err) {
         log.error(err)
         done()
         return
       }
-      log.error(`Response from the coverage intake: ${res}`)
       done()
     })
   }
