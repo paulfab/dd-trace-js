@@ -33,7 +33,7 @@ class Writer extends BaseWriter {
     options.hostname = this._url.hostname
     options.port = this._url.port
 
-    log.debug(() => `Request to the intake: ${safeJSONStringify(options)}`)
+    log.error(() => `Request to the coverage intake: ${safeJSONStringify(options)}`)
 
     request(form, options, (err, res) => {
       if (err) {
@@ -41,7 +41,7 @@ class Writer extends BaseWriter {
         done()
         return
       }
-      log.debug(`Response from the intake: ${res}`)
+      log.error(`Response from the coverage intake: ${res}`)
       done()
     })
   }

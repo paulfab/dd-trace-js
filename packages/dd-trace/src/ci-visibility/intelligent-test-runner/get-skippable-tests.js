@@ -1,4 +1,5 @@
 const request = require('../../exporters/common/request')
+const log = require('../../log')
 
 function getSkippableTests ({
   site,
@@ -60,6 +61,7 @@ function getSkippableTests ({
             name,
             suite
           }))
+        log.error(`Received skippable tests: ${JSON.stringify(skippableTests)}`)
         done(null, skippableTests)
       } catch (e) {
         done(e)

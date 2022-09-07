@@ -178,7 +178,7 @@ function sendGitMetadata (site, callback) {
     const commitsToUpload = getCommitsToUpload(commitsToExclude)
 
     if (!commitsToUpload.length) {
-      log.debug('No commits to upload')
+      log.error('No commits to upload')
       callback(null)
       return
     }
@@ -189,9 +189,15 @@ function sendGitMetadata (site, callback) {
     // This uploads packfiles sequentially
     const uploadPackFileCallback = (err) => {
       if (err || packFileIndex === packFilesToUpload.length) {
+        if (err) {
+          log.error(`Error when uploading ${err}`)
+        } else {
+          log.error(`Finished with packfiles`)
+        }
         callback(err)
         return
       }
+      log.error(`Uploading ${packFilesToUpload[packFileIndex]}`)
       return uploadPackFile(
         {
           packFileToUpload: packFilesToUpload[packFileIndex++],

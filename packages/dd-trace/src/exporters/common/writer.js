@@ -25,7 +25,7 @@ class Writer {
 
   append (payload) {
     if (!request.writable) {
-      log.debug(() => `Maximum number of active requests reached. Payload discarded: ${JSON.stringify(payload)}`)
+      log.error(() => `Maximum number of active requests reached. Payload discarded: ${JSON.stringify(payload)}`)
       return
     }
 
