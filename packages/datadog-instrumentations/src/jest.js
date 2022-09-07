@@ -100,7 +100,14 @@ function getWrappedEnvironment (BaseEnvironment) {
   return class DatadogEnvironment extends BaseEnvironment {
     constructor (config, context) {
       super(config, context)
-      const rootDir = config.globalConfig ? config.globalConfig.rootDir : config.rootDir
+      let rootDir
+
+      if (config.projectConfig) {
+        rootDir = config.projectConfig.cwd
+      } else {
+        rootDir = config.globalConfig ? config.globalConfig.rootDir : config.rootDir
+      }
+
       this.rootDir = rootDir
       this.testSuite = getTestSuitePath(context.testPath, rootDir)
       this.nameToParams = {}
