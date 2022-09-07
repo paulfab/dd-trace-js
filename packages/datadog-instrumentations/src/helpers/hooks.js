@@ -32,6 +32,7 @@ module.exports = {
   'http2': () => require('../http2'),
   'https': () => require('../http'),
   'ioredis': () => require('../ioredis'),
+  'jest-circus': () => require('../jest'),
   'jest-config': () => require('../jest'),
   'jest-environment-node': () => require('../jest'),
   'jest-environment-jsdom': () => require('../jest'),

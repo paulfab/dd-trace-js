@@ -116,16 +116,16 @@ function getWrappedEnvironment (BaseEnvironment) {
 
     async handleTestEvent (event, state) {
       if (event.name === 'run_start' && this._ddTestsToSkip && this._ddTestsToSkip.length) {
-        // In `run_start` every test in the suite is available
-        const testsInSuite = getTestsFromSuite(state.currentDescribeBlock)
-        testsInSuite.forEach(test => {
-          const testFullName = getJestTestName(test)
-          const shouldSkipTest = !!this._ddTestsToSkip.find(test => test.name === testFullName)
-          if (shouldSkipTest) {
-            // We mark them for skipping
-            test.mode = 'skip'
-          }
-        })
+        // // In `run_start` every test in the suite is available
+        // const testsInSuite = getTestsFromSuite(state.currentDescribeBlock)
+        // testsInSuite.forEach(test => {
+        //   const testFullName = getJestTestName(test)
+        //   const shouldSkipTest = !!this._ddTestsToSkip.find(test => test.name === testFullName)
+        //   if (shouldSkipTest) {
+        //     // We mark them for skipping
+        //     test.mode = 'skip'
+        //   }
+        // })
       }
 
       if (super.handleTestEvent) {
@@ -135,62 +135,62 @@ function getWrappedEnvironment (BaseEnvironment) {
       const setNameToParams = (name, params) => { this.nameToParams[name] = params }
 
       if (event.name === 'setup') {
-        if (this.global.test) {
-          shimmer.wrap(this.global.test, 'each', each => function () {
-            const testParameters = getFormattedJestTestParameters(arguments)
-            const eachBind = each.apply(this, arguments)
-            return function () {
-              const [testName] = arguments
-              setNameToParams(testName, testParameters)
-              return eachBind.apply(this, arguments)
-            }
-          })
-        }
+        // if (this.global.test) {
+        //   shimmer.wrap(this.global.test, 'each', each => function () {
+        //     const testParameters = getFormattedJestTestParameters(arguments)
+        //     const eachBind = each.apply(this, arguments)
+        //     return function () {
+        //       const [testName] = arguments
+        //       setNameToParams(testName, testParameters)
+        //       return eachBind.apply(this, arguments)
+        //     }
+        //   })
+        // }
       }
       if (event.name === 'test_start') {
-        const testParameters = getTestParametersString(this.nameToParams, event.test.name)
-        // Async resource for this test is created here
-        // It is used later on by the test_done handler
-        const asyncResource = new AsyncResource('bound-anonymous-fn')
-        asyncResources.set(event.test, asyncResource)
-        asyncResource.runInAsyncScope(() => {
-          testStartCh.publish({
-            name: getJestTestName(event.test),
-            suite: this.testSuite,
-            runner: 'jest-circus',
-            testParameters
-          })
-          originalTestFns.set(event.test, event.test.fn)
-          event.test.fn = asyncResource.bind(event.test.fn)
-        })
+        // const testParameters = getTestParametersString(this.nameToParams, event.test.name)
+        // // Async resource for this test is created here
+        // // It is used later on by the test_done handler
+        // const asyncResource = new AsyncResource('bound-anonymous-fn')
+        // asyncResources.set(event.test, asyncResource)
+        // asyncResource.runInAsyncScope(() => {
+        //   testStartCh.publish({
+        //     name: getJestTestName(event.test),
+        //     suite: this.testSuite,
+        //     runner: 'jest-circus',
+        //     testParameters
+        //   })
+        //   originalTestFns.set(event.test, event.test.fn)
+        //   event.test.fn = asyncResource.bind(event.test.fn)
+        // })
       }
       if (event.name === 'test_done') {
-        const asyncResource = asyncResources.get(event.test)
-        asyncResource.runInAsyncScope(() => {
-          if (this.global.__coverage__) {
-            const coverageFiles = extractCoverageInformation(this.global.__coverage__, this.rootDir)
-            testCodeCoverageCh.publish(coverageFiles)
-          }
-          let status = 'pass'
-          if (event.test.errors && event.test.errors.length) {
-            status = 'fail'
-            const formattedError = formatJestError(event.test.errors[0])
-            testErrCh.publish(formattedError)
-          }
-          testRunFinishCh.publish(status)
-          // restore in case it is retried
-          event.test.fn = originalTestFns.get(event.test)
-        })
+        // const asyncResource = asyncResources.get(event.test)
+        // asyncResource.runInAsyncScope(() => {
+        //   if (this.global.__coverage__) {
+        //     const coverageFiles = extractCoverageInformation(this.global.__coverage__, this.rootDir)
+        //     testCodeCoverageCh.publish(coverageFiles)
+        //   }
+        //   let status = 'pass'
+        //   if (event.test.errors && event.test.errors.length) {
+        //     status = 'fail'
+        //     const formattedError = formatJestError(event.test.errors[0])
+        //     testErrCh.publish(formattedError)
+        //   }
+        //   testRunFinishCh.publish(status)
+        //   // restore in case it is retried
+        //   event.test.fn = originalTestFns.get(event.test)
+        // })
       }
       if (event.name === 'test_skip' || event.name === 'test_todo') {
-        const asyncResource = new AsyncResource('bound-anonymous-fn')
-        asyncResource.runInAsyncScope(() => {
-          testSkippedCh.publish({
-            name: getJestTestName(event.test),
-            suite: this.testSuite,
-            runner: 'jest-circus'
-          })
-        })
+        // const asyncResource = new AsyncResource('bound-anonymous-fn')
+        // asyncResource.runInAsyncScope(() => {
+        //   testSkippedCh.publish({
+        //     name: getJestTestName(event.test),
+        //     suite: this.testSuite,
+        //     runner: 'jest-circus'
+        //   })
+        // })
       }
     }
   }
@@ -225,6 +225,9 @@ addHook({
     const result = await readConfigs.apply(this, arguments)
     const { configs } = result
     configs.forEach(config => {
+      skippableTests.forEach(({ suite }) => {
+        config.testMatch.push(`!**/${suite}`)
+      })
       config.testEnvironmentOptions._ddTestsToSkip = skippableTests
     })
     skippableTests = []
@@ -261,6 +264,8 @@ addHook({
       onError = reject
     })
 
+    debugger
+
     const asyncResource = new AsyncResource('bound-anonymous-fn')
     asyncResource.runInAsyncScope(() => {
       skippableTestsCh.publish({ onResponse, onError })
@@ -270,7 +275,9 @@ addHook({
       skippableTests = await skippableTestsRequestPromise
     } catch (e) {
       // ignore error
+      debugger
     }
+    debugger
 
     return runCLI.apply(this, arguments)
   })
@@ -311,4 +318,47 @@ addHook({
     })
     return jasmineAsyncInstallExport.default(globalConfig, globalInput)
   }
+})
+
+addHook({
+  name: 'jest-circus',
+  file: 'build/legacy-code-todo-rewrite/jestAdapter.js',
+  versions: ['>=24.8.0']
+}, jestAdapter => {
+  const adapter = jestAdapter.default ? jestAdapter.default : jestAdapter
+  const newAdapter = shimmer.wrap(adapter, function () {
+    const environment = arguments[2]
+    const asyncResource = new AsyncResource('bound-anonymous-fn')
+    return asyncResource.runInAsyncScope(() => {
+      testStartCh.publish({
+        name: 'very-real-name',
+        suite: environment.testSuite,
+        runner: 'jest-circus'
+      })
+      return adapter.apply(this, arguments).then(suiteResults => {
+        const { numFailingTests, skipped, failureMessage: errorMessage } = suiteResults
+        let status = 'pass'
+        if (skipped) {
+          status = 'skipped'
+        } else if (numFailingTests !== 0) {
+          status = 'fail'
+        }
+        const coverageFiles = extractCoverageInformation(environment.global.__coverage__, environment.rootDir)
+        testCodeCoverageCh.publish(coverageFiles)
+
+        if (errorMessage) {
+          testErrCh.publish(new Error(errorMessage))
+        }
+        testRunFinishCh.publish(status)
+        return suiteResults
+      })
+    })
+  })
+  if (jestAdapter.default) {
+    jestAdapter.default = newAdapter
+  } else {
+    jestAdapter = newAdapter
+  }
+
+  return jestAdapter
 })
