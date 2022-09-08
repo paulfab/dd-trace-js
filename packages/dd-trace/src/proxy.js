@@ -60,8 +60,6 @@ class Tracer extends NoopProxy {
 
       const isTestingFramework = process.argv.some(argv => argv.includes('.bin/jest'))
 
-      log.error('is testing framework', isTestingFramework)
-
       if (config.isGitUploadEnabled && isTestingFramework) {
         let onResponse, onError
         this._tracer._gitMetadataPromise = new Promise((resolve, reject) => {

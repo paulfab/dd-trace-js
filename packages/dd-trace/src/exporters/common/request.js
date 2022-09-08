@@ -40,8 +40,6 @@ function request (data, options, callback) {
     options.headers['Datadog-Container-ID'] = containerId
   }
 
-  options.agent = isSecure ? httpsAgent : httpAgent
-
   const onResponse = res => {
     let responseData = ''
 
