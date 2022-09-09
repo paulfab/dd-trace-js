@@ -85,6 +85,17 @@ function formatJestError (errors) {
   return error
 }
 
+function getTestEnvironmentOptions (config) {
+  // config in newer jest versions has this structure
+  if (config.projectConfig && config.projectConfig.testEnvironmentOptions) {
+    return config.projectConfig.testEnvironmentOptions
+  }
+  if (config.testEnvironmentOptions) {
+    return config.testEnvironmentOptions
+  }
+  return {}
+}
+
 function getWrappedEnvironment (BaseEnvironment) {
   return class DatadogEnvironment extends BaseEnvironment {
     constructor (config, context) {
@@ -101,6 +112,12 @@ function getWrappedEnvironment (BaseEnvironment) {
       this.testSuite = getTestSuitePath(context.testPath, rootDir)
       this.nameToParams = {}
       this.global._ddtrace = global._ddtrace
+
+      const { _ddTestsToSkip } = getTestEnvironmentOptions(config)
+
+      if (_ddTestsToSkip && _ddTestsToSkip.length) {
+        this.isTestsSkipped = true
+      }
     }
 
     async handleTestEvent (event, state) {
@@ -325,7 +342,8 @@ addHook({
       testStartCh.publish({
         name: 'very-real-name',
         suite: environment.testSuite,
-        runner: 'jest-circus'
+        runner: 'jest-circus',
+        isTestsSkipped: environment.testsSkipped
       })
       return adapter.apply(this, arguments).then(suiteResults => {
         const { numFailingTests, skipped, failureMessage: errorMessage } = suiteResults

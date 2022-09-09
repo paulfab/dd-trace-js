@@ -104,7 +104,7 @@ function getCommitsToExclude ({ url, repositoryUrl }, callback) {
  * This function uploads a git packfile
  */
 function uploadPackFile ({ url, packFileToUpload, repositoryUrl, headCommit }, callback) {
-  log.error(`Uploading ${packFileToUpload}`)
+  log.debug(`Uploading ${packFileToUpload}`)
 
   const form = new FormData()
 
@@ -180,7 +180,7 @@ function sendGitMetadata (site, callback) {
     const commitsToUpload = getCommitsToUpload(commitsToExclude)
 
     if (!commitsToUpload.length) {
-      log.error('No commits to upload')
+      log.debug('No commits to upload')
       callback(null)
       return
     }
@@ -194,7 +194,7 @@ function sendGitMetadata (site, callback) {
         if (err) {
           log.error(`Error when uploading ${err}`)
         } else {
-          log.error(`Finished with packfiles`)
+          log.debug(`Finished with packfiles`)
         }
         callback(err)
         return

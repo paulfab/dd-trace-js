@@ -48,7 +48,7 @@ function getSkippableTests ({
       }
     }
   })
-  log.error(`Request to skippable: ${data}`)
+  log.debug(`Request to skippable: ${data}`)
 
   request(data, options, (err, res) => {
     if (err) {
@@ -63,7 +63,8 @@ function getSkippableTests ({
             name,
             suite
           }))
-        log.error(`Received skippable tests: ${JSON.stringify(skippableTests)}`)
+        log.error(`Received ${skippableTests.length} tests to skip.`)
+        log.debug(`Received skippable tests: ${JSON.stringify(skippableTests)}`)
         done(null, skippableTests)
       } catch (e) {
         done(e)

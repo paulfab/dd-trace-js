@@ -23,16 +23,22 @@ const CHILD_MESSAGE_END = 2
 function getTestSpanMetadata (tracer, test) {
   const childOf = getTestParentSpan(tracer)
 
-  const { suite, name, runner, testParameters } = test
+  const { suite, name, runner, testParameters, isTestsSkipped } = test
 
   const commonTags = getTestCommonTags(name, suite, tracer._version)
 
-  return {
+  const tags = {
     childOf,
     ...commonTags,
     [JEST_TEST_RUNNER]: runner,
     [TEST_PARAMETERS]: testParameters
   }
+
+  if (isTestsSkipped) {
+    tags['_dd.ci.itr.skipped_tests'] = 1
+  }
+
+  return tags
 }
 
 class JestPlugin extends Plugin {

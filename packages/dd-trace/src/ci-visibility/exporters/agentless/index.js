@@ -32,7 +32,6 @@ class AgentlessCiVisibilityExporter {
       files: coverageFiles
     }
 
-    log.error(`exported coverage: ${JSON.stringify(coverageFiles)}`)
     this._coverageWriter.append(formattedCoverage)
 
     const { flushInterval } = this._config
