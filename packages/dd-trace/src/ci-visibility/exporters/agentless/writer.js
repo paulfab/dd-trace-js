@@ -35,6 +35,7 @@ class Writer extends BaseWriter {
     options.port = this._url.port
 
     log.debug(() => `Request to the event intake: ${safeJSONStringify(options)}`)
+
     request(data, options, (err, res) => {
       if (err) {
         log.error(err)

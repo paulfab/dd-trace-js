@@ -85,17 +85,6 @@ function formatJestError (errors) {
   return error
 }
 
-function getTestEnvironmentOptions (config) {
-  // config in newer jest versions has this structure
-  if (config.projectConfig && config.projectConfig.testEnvironmentOptions) {
-    return config.projectConfig.testEnvironmentOptions
-  }
-  if (config.testEnvironmentOptions) {
-    return config.testEnvironmentOptions
-  }
-  return {}
-}
-
 function getWrappedEnvironment (BaseEnvironment) {
   return class DatadogEnvironment extends BaseEnvironment {
     constructor (config, context) {
@@ -112,27 +101,21 @@ function getWrappedEnvironment (BaseEnvironment) {
       this.testSuite = getTestSuitePath(context.testPath, rootDir)
       this.nameToParams = {}
       this.global._ddtrace = global._ddtrace
-
-      const { _ddTestsToSkip } = getTestEnvironmentOptions(config)
-
-      if (_ddTestsToSkip && _ddTestsToSkip.length) {
-        this._ddTestsToSkip = _ddTestsToSkip.filter(({ suite }) => suite === this.testSuite)
-      }
     }
 
     async handleTestEvent (event, state) {
-      if (event.name === 'run_start' && this._ddTestsToSkip && this._ddTestsToSkip.length) {
-        // // In `run_start` every test in the suite is available
-        // const testsInSuite = getTestsFromSuite(state.currentDescribeBlock)
-        // testsInSuite.forEach(test => {
-        //   const testFullName = getJestTestName(test)
-        //   const shouldSkipTest = !!this._ddTestsToSkip.find(test => test.name === testFullName)
-        //   if (shouldSkipTest) {
-        //     // We mark them for skipping
-        //     test.mode = 'skip'
-        //   }
-        // })
-      }
+      // if (event.name === 'run_start' && this._ddTestsToSkip && this._ddTestsToSkip.length) {
+      //   // // In `run_start` every test in the suite is available
+      //   // const testsInSuite = getTestsFromSuite(state.currentDescribeBlock)
+      //   // testsInSuite.forEach(test => {
+      //   //   const testFullName = getJestTestName(test)
+      //   //   const shouldSkipTest = !!this._ddTestsToSkip.find(test => test.name === testFullName)
+      //   //   if (shouldSkipTest) {
+      //   //     // We mark them for skipping
+      //   //     test.mode = 'skip'
+      //   //   }
+      //   // })
+      // }
 
       if (super.handleTestEvent) {
         await super.handleTestEvent(event, state)
@@ -353,7 +336,9 @@ addHook({
           status = 'fail'
         }
         const coverageFiles = extractCoverageInformation(environment.global.__coverage__, environment.rootDir)
-        testCodeCoverageCh.publish(coverageFiles)
+        if (coverageFiles && coverageFiles.length) {
+          testCodeCoverageCh.publish(coverageFiles)
+        }
 
         if (errorMessage) {
           testErrCh.publish(new Error(errorMessage))
