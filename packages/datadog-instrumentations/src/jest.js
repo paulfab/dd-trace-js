@@ -362,7 +362,8 @@ addHook({
         }
         const coverageFiles = extractCoverageInformation(environment.global.__coverage__, environment.rootDir)
         if (coverageFiles && coverageFiles.length) {
-          testCodeCoverageCh.publish(coverageFiles)
+          // Include test file
+          testCodeCoverageCh.publish([...coverageFiles, environment.testSuite])
         }
 
         if (errorMessage) {
