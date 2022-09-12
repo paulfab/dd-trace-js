@@ -63,7 +63,6 @@ function getSkippableTests ({
             name,
             suite
           }))
-        log.error(`Received ${skippableTests.length} tests to skip.`)
         log.debug(`Received skippable tests: ${JSON.stringify(skippableTests)}`)
         done(null, skippableTests)
       } catch (e) {

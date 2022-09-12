@@ -49,6 +49,14 @@ const originalTestFns = new WeakMap()
 
 let skippableTests = []
 
+const suiteToName = {
+  '__tests__/lib/array.test.js': 'array can compare arrays',
+  '__tests__/components/exporter.test.js': 'exporter can export payloads',
+  '__tests__/lib/clone.test.js': 'clone can clone objects',
+  '__tests__/lib/request.test.js': 'request can POST data',
+  '__tests__/lib/log.test.js': 'log can log errors'
+}
+
 function getTestsFromSuite (root) {
   let tests = []
 
@@ -115,9 +123,7 @@ function getWrappedEnvironment (BaseEnvironment) {
 
       const { _ddTestsToSkip } = getTestEnvironmentOptions(config)
 
-      if (_ddTestsToSkip && _ddTestsToSkip.length) {
-        this.isTestsSkipped = true
-      }
+      this.isTestsSkipped = !!(_ddTestsToSkip && _ddTestsToSkip.length)
     }
 
     async handleTestEvent (event, state) {
@@ -339,11 +345,12 @@ addHook({
     const environment = arguments[2]
     const asyncResource = new AsyncResource('bound-anonymous-fn')
     return asyncResource.runInAsyncScope(() => {
+      const testName = suiteToName[environment.testSuite]
       testStartCh.publish({
-        name: 'very-real-name',
+        name: testName || 'very-real-name',
         suite: environment.testSuite,
         runner: 'jest-circus',
-        isTestsSkipped: environment.testsSkipped
+        isTestsSkipped: environment.isTestsSkipped
       })
       return adapter.apply(this, arguments).then(suiteResults => {
         const { numFailingTests, skipped, failureMessage: errorMessage } = suiteResults
