@@ -35,7 +35,7 @@ function getTestSpanMetadata (tracer, test) {
   }
 
   if (isTestsSkipped) {
-    tags['_dd.ci.itr.skipped_tests'] = 1
+    tags['_dd.ci.itr.skipped_tests'] = 'true'
   }
 
   return tags
