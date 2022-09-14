@@ -17,6 +17,14 @@ const {
 
 const { getSkippableTests } = require('../../dd-trace/src/ci-visibility/intelligent-test-runner/get-skippable-tests')
 
+const TESTS_TO_FLAKY = [
+  '__tests__/lib/array.test.js',
+  '__tests__/components/exporter.test.js',
+  '__tests__/lib/clone.test.js',
+  '__tests__/lib/request.test.js',
+  '__tests__/lib/log.test.js'
+]
+
 // https://github.com/facebook/jest/blob/d6ad15b0f88a05816c2fe034dd6900d28315d570/packages/jest-worker/src/types.ts#L38
 const CHILD_MESSAGE_END = 2
 
@@ -77,6 +85,12 @@ class JestPlugin extends Plugin {
     this.addSub('ci:jest:test:start', (test) => {
       const store = storage.getStore()
       const span = this.startTestSpan(test)
+
+      if (TESTS_TO_FLAKY.includes(test.suite)) {
+        const extraSpan = this.startTestSpan(test)
+        extraSpan.setTag(TEST_STATUS, 'fail')
+        extraSpan.finish()
+      }
 
       this.enter(span, store)
     })
