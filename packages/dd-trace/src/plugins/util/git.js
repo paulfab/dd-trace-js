@@ -49,7 +49,7 @@ function generatePackFilesForCommits (commitsToUpload) {
   const tmpFolder = process.cwd()
 
   const prefix = Math.floor(Math.random() * 10000)
-  const tmpPath = path.join(tmpFolder, prefix)
+  const tmpPath = path.join(tmpFolder, `${prefix}`)
 
   const orderedCommits =
     execSync(
