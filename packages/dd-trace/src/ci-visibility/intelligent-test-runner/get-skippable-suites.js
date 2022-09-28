@@ -1,4 +1,5 @@
 const request = require('../../exporters/common/request')
+const log = require('../../log')
 
 function getSkippableSuites ({
   site,
@@ -68,6 +69,8 @@ function getSkippableSuites ({
           .data
           .filter(({ type }) => type === 'suite')
           .map(({ attributes: { suite } }) => suite)
+
+        log.error(`Suites to skip: ${JSON.stringify(skippableSuites)}`)
         done(null, skippableSuites)
       } catch (e) {
         done(e)
