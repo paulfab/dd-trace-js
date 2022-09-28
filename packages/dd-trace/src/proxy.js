@@ -66,7 +66,7 @@ class Tracer extends NoopProxy {
           if (err) {
             log.error(`Error uploading git metadata: ${err}`)
           } else {
-            log.error('Successfully uploaded git metadata')
+            log.debug('Successfully uploaded git metadata')
           }
           gitMetadataUploadFinishCh.publish(err)
         })

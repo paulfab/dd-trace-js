@@ -178,7 +178,7 @@ function sendGitMetadata (site, callback) {
     const commitsToUpload = getCommitsToUpload(commitsToExclude)
 
     if (!commitsToUpload.length) {
-      log.error('No commits to upload')
+      log.debug('No commits to upload')
       callback(null)
       return
     }
