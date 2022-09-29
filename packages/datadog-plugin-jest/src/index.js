@@ -204,7 +204,7 @@ class JestPlugin extends Plugin {
     })
 
     this.addSub('ci:jest:test-suite:code-coverage', (coverageFiles) => {
-      if (!this.config.isAgentlessEnabled || !this.config.isIntelligentTestRunnerEnabled) {
+      if (!this.config.isAgentlessEnabled) {
         return
       }
       const testSuiteSpan = storage.getStore().span
