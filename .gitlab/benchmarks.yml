@@ -10,20 +10,10 @@ benchmarks:
   timeout: 1h
   script:
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.ddbuild.io/DataDog/".insteadOf "https://github.com/DataDog/"
-    - export REPORTS_DIR="$(pwd)/reports/" && (mkdir "${REPORTS_DIR}" || :)
-    - git clone --branch dd-trace-js https://github.com/DataDog/relenv-microbenchmarking-platform /platform && cd /platform
-    - ./steps/install-benchmark-analyzer.sh
-    - ./steps/install-pr-commenter.sh
+    - git clone --branch dyurchenko/test-s3 https://github.com/DataDog/relenv-microbenchmarking-platform /platform && cd /platform
+    - source ./steps/install-base-deps.sh
     - ./steps/capture-hardware-software-info.sh
-    - ./steps/run-benchmarks.sh
-    - ./steps/analyze-results.sh
-    - "./steps/upload-results-to-s3.sh || :"
-    - "./steps/post-pr-comment.sh || :"
-  artifacts:
-    name: "reports"
-    paths:
-      - reports/
-    expire_in: 3 months
+    - ./steps/upload-results-to-s3.sh
   variables:
     UPSTREAM_PROJECT_ID: $CI_PROJECT_ID
     UPSTREAM_PROJECT_NAME: $CI_PROJECT_NAME
