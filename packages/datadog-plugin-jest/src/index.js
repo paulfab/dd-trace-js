@@ -79,7 +79,7 @@ class JestPlugin extends Plugin {
       }
       if (message === CHILD_MESSAGE_END) {
         this.tracer._exporter._writer.flush(onFlush)
-        this.tracer._exporter._writer._coverageWriter(onFlush)
+        this.tracer._exporter._coverageWriter.flush(onFlush)
       }
     }
     process.on('message', handler)
