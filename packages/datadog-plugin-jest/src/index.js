@@ -67,14 +67,19 @@ class JestPlugin extends Plugin {
 
     // Used to handle the end of a jest worker to be able to flush
     const handler = ([message]) => {
-      if (message === CHILD_MESSAGE_END) {
-        this.tracer._exporter._writer.flush(() => {
-          // eslint-disable-next-line
-          // https://github.com/facebook/jest/blob/24ed3b5ecb419c023ee6fdbc838f07cc028fc007/packages/jest-worker/src/workers/processChild.ts#L118-L133
-          // Only after the flush is done we clean up open handles
-          // so the worker process can hopefully exit gracefully
+      let numFlushes = 0
+      const onFlush = () => {
+        // eslint-disable-next-line
+        // https://github.com/facebook/jest/blob/24ed3b5ecb419c023ee6fdbc838f07cc028fc007/packages/jest-worker/src/workers/processChild.ts#L118-L133
+        // Only after the flush is done we clean up open handles
+        // so the worker process can hopefully exit gracefully
+        if (++numFlushes === 2) {
           process.removeListener('message', handler)
-        })
+        }
+      }
+      if (message === CHILD_MESSAGE_END) {
+        this.tracer._exporter._writer.flush(onFlush)
+        this.tracer._exporter._writer._coverageWriter(onFlush)
       }
     }
     process.on('message', handler)
@@ -187,6 +192,7 @@ class JestPlugin extends Plugin {
       testSessionSpan.finish()
       finishAllTraceSpans(testSessionSpan)
       this.tracer._exporter._writer.flush()
+      this.tracer._exporter._coverageWriter.flush()
     })
 
     // Test suites can be run in a different process from jest's main one.
