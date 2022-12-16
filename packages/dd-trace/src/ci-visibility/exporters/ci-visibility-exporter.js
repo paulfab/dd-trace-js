@@ -14,6 +14,20 @@ function getIsTestSessionTrace (trace) {
   )
 }
 
+// This is the first node process that comes from npm or yarn
+// when first calling yarn <script> or npm run <script>.
+const isUserScript = () => {
+  return !!process.env.npm_config_user_agent
+}
+
+const isJestWorker = () => {
+  return !!process.env.JEST_WORKER_ID
+}
+
+const shouldUploadGit = () => {
+  return isUserScript() && !isJestWorker()
+}
+
 class CiVisibilityExporter extends AgentInfoExporter {
   constructor (config) {
     super(config)
@@ -117,6 +131,10 @@ class CiVisibilityExporter extends AgentInfoExporter {
   }
 
   sendGitMetadata ({ url, isEvpProxy }) {
+    if (!shouldUploadGit()) {
+      return
+    }
+
     sendGitMetadataRequest(url, isEvpProxy, (err) => {
       if (err) {
         log.error(`Error uploading git metadata: ${err.message}`)
