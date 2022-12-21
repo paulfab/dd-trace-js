@@ -22,12 +22,7 @@ for (const packageName of names) {
 
     hooks[packageName]()
 
-    const instrumentation = instrumentations[packageName]
-    if (!instrumentation) {
-      return moduleExports
-    }
-
-    for (const { name, file, versions, hook } of instrumentation) {
+    for (const { name, file, versions, hook } of instrumentations[packageName]) {
       const fullFilename = filename(name, file)
 
       if (moduleName === fullFilename) {
