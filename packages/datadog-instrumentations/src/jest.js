@@ -266,11 +266,12 @@ function coverageReporterWrapper (coverageReporter) {
      * This speeds up the process, though it's unclear why.
      */
     console.log('yeah yeah!')
+    return Promise.resolve()
     arguments[0].forEach(({ config }) => {
-      console.log('config.testEnvironmentOptions', config.testEnvironmentOptions)
-      delete config.testEnvironmentOptions._ddTestSessionId
-      delete config.testEnvironmentOptions._ddTestCommand
-      delete config.testEnvironmentOptions._ddTestCodeCoverageEnabled
+      // console.log('config.testEnvironmentOptions', config.testEnvironmentOptions)
+      // delete config.testEnvironmentOptions._ddTestSessionId
+      // delete config.testEnvironmentOptions._ddTestCommand
+      // delete config.testEnvironmentOptions._ddTestCodeCoverageEnabled
     })
     if (isSuitesSkippingEnabled) {
       return Promise.resolve()
