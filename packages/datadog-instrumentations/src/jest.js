@@ -261,6 +261,15 @@ function coverageReporterWrapper (coverageReporter) {
    * This calculation adds no value, so we'll skip it.
    */
   shimmer.wrap(CoverageReporter.prototype, '_addUntestedFiles', addUntestedFiles => async function () {
+    /**
+     * We clean up the test environment we used earlier before moving on to calculating code coverage.
+     * This speeds up the process, though it's unclear why.
+     */
+    arguments[0].forEach(({ config }) => {
+      delete config.testEnvironmentOptions._ddTestSessionId
+      delete config.testEnvironmentOptions._ddTestCommand
+      delete config.testEnvironmentOptions._ddTestCodeCoverageEnabled
+    })
     if (isSuitesSkippingEnabled) {
       return Promise.resolve()
     }
@@ -309,18 +318,18 @@ function jestAdapterWrapper (jestAdapter) {
         } else if (numFailingTests !== 0) {
           status = 'fail'
         }
-        testSuiteFinishCh.publish({ status, errorMessage })
-
         const coverageFiles = getCoveredFilenamesFromCoverage(environment.global.__coverage__)
           .map(filename => getTestSuitePath(filename, environment.rootDir))
 
         if (coverageFiles &&
           environment.testEnvironmentOptions &&
           environment.testEnvironmentOptions._ddTestCodeCoverageEnabled) {
-          asyncResource.runInAsyncScope(() => {
-            testSuiteCodeCoverageCh.publish([...coverageFiles, environment.testSuite])
-          })
+            asyncResource.runInAsyncScope(() => {
+              testSuiteCodeCoverageCh.publish([...coverageFiles, environment.testSuite])
+            })
         }
+        testSuiteFinishCh.publish({ status, errorMessage })
+
         return suiteResults
       })
     })
