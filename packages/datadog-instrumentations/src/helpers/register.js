@@ -22,6 +22,14 @@ for (const packageName of names) {
 
     hooks[packageName]()
 
+    const insts = instrumentations[packageName]
+
+    if (!insts) {
+      console.log('packageName', packageName)
+      console.log('instrumentations[packageName]', instrumentations[packageName])
+      return moduleExports
+    }
+
     for (const { name, file, versions, hook } of instrumentations[packageName]) {
       const fullFilename = filename(name, file)
 
