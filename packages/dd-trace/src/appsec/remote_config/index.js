@@ -2,7 +2,7 @@
 
 const RemoteConfigManager = require('./manager')
 const RemoteConfigCapabilities = require('./capabilities')
-const RuleManager = require('../rule_manager')
+const { updateAsmDDRules, updateAsmData } = require('../rule_manager')
 
 let rc
 
@@ -35,22 +35,35 @@ function enable (config) {
 function enableAsmData (appsecConfig) {
   if (rc && appsecConfig && appsecConfig.rules === undefined) {
     rc.updateCapabilities(RemoteConfigCapabilities.ASM_IP_BLOCKING, true)
-    rc.on('ASM_DATA', _asmDataListener)
+    rc.on('ASM_DATA', updateAsmData)
   }
 }
 
 function disableAsmData () {
   if (rc) {
-    rc.off('ASM_DATA', _asmDataListener)
+    rc.updateCapabilities(RemoteConfigCapabilities.ASM_IP_BLOCKING, false)
+    rc.off('ASM_DATA', updateAsmData)
   }
 }
 
-function _asmDataListener (action, ruleData, ruleId) {
-  RuleManager.updateAsmData(action, ruleData, ruleId)
+function enableAsmDDRules (appsecConfig) {
+  if (rc && appsecConfig && appsecConfig.rules === undefined) {
+    rc.updateCapabilities(RemoteConfigCapabilities.ASM_DD_RULES, true)
+    rc.on('ASM_DD', updateAsmDDRules)
+  }
+}
+
+function disableAsmDDRules () {
+  if (rc) {
+    rc.updateCapabilities(RemoteConfigCapabilities.ASM_DD_RULES, false)
+    rc.off('ASM_DD', updateAsmDDRules)
+  }
 }
 
 module.exports = {
   enable,
   enableAsmData,
-  disableAsmData
+  enableAsmDDRules,
+  disableAsmData,
+  disableAsmDDRules
 }
