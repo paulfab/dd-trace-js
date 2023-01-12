@@ -3,6 +3,7 @@
 const tracerVersion = require('../../../../package.json').version
 const os = require('os')
 const dependencies = require('./dependencies')
+const logs = require('./logs')
 const { sendData } = require('./send-data')
 
 const HEARTBEAT_INTERVAL = process.env.DD_TELEMETRY_HEARTBEAT_INTERVAL
@@ -112,6 +113,7 @@ function start (aConfig, thePluginManager) {
   application = createAppObject()
   host = createHostObject()
   dependencies.start(config, application, host)
+  logs.start(config, application, host)
   sendData(config, application, host, 'app-started', appStarted())
   interval = setInterval(() => {
     sendData(config, application, host, 'app-heartbeat')
@@ -126,6 +128,7 @@ function stop () {
   }
   clearInterval(interval)
   process.removeListener('beforeExit', onBeforeExit)
+  logs.stop()
 }
 
 function updateIntegrations () {
