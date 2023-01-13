@@ -1,7 +1,8 @@
 'use strict'
 
-const { storage } = require('../../../datadog-core')
-const { isTrue } = require('../util')
+const os = require('os')
+
+const { isTrue, calculateDDBasePath } = require('../util')
 const { sendData } = require('./send-data')
 const { Level, subscribe, unsubscribe } = require('../log_channels')
 
@@ -14,12 +15,13 @@ const debugEnabled = process.env.TELEMETRY_DEBUG_ENABLED
   ? isTrue(process.env.TELEMETRY_DEBUG_ENABLED)
   : false
 
-let config, application, host, listeners
-
+const ddBasePath = calculateDDBasePath(__dirname)
 const defaultListeners = {
   [Level.Warn]: onWarn,
   [Level.Error]: onError
 }
+
+let config, application, host, listeners
 
 function onDebug (message) {
   sendLogs({
@@ -40,30 +42,33 @@ function onError (err) {
     err = err()
   }
 
+  const payload = {
+    level: 'ERROR'
+  }
+
   let message
-  let stackTrace
   if (typeof err !== 'object' || !err) {
     message = String(err)
   } else if (!err.stack) {
     message = String(err.message || err)
   } else {
     message = err.message || err
-    stackTrace = err.stack
+    payload['stack_trace'] = sanitizeStackTrace(err.stack)
   }
 
-  sendLogs({
-    message,
-    stack_trace: stackTrace,
-    level: 'ERROR'
-  })
+  payload['message'] = message
+
+  sendLogs(payload)
 }
 
+function sanitizeStackTrace (stackTrace) {
+  let lines = stackTrace.split(os.EOL)
+  lines = lines.map(line => line.includes(ddBasePath) ? line : '[omitted]')
+  return lines.join(os.EOL)
+}
+
+// TODO
 function addTags (payload) {
-  const context = storage.getStore()
-  if (context && context.span) {
-    // const spanContext = context.span.context()
-    // payload.tags = `traceId:`
-  }
   return payload
 }
 
@@ -71,12 +76,12 @@ function sendLogs (payload) {
   sendData(config, application, host, 'logs', addTags(payload))
 }
 
-function start (_config, _application, _host) {
+function start (aConfig, appplicationObject, hostObject) {
   if (!isLogCollectionEnabled) return
 
-  config = _config
-  application = _application
-  host = _host
+  config = aConfig
+  application = appplicationObject
+  host = hostObject
 
   if (debugEnabled) {
     listeners = Object.assign({}, defaultListeners, {
@@ -101,4 +106,4 @@ function stop () {
   unsubscribe(listeners)
 }
 
-module.exports = { start, stop }
+module.exports = { start, stop, sanitizeStackTrace }
