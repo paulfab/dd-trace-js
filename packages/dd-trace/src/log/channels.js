@@ -36,9 +36,27 @@ function getChannelLogLevel (level) {
   return logChannel.logLevel
 }
 
+function subscribe (listeners) {
+  for (const channelName in listeners) {
+    const channel = logChannels[channelName]
+    const listener = listeners[channelName]
+    channel && listener && channel.subscribe(listener)
+  }
+}
+
+function unsubscribe (listeners) {
+  for (const channelName in listeners) {
+    const channel = logChannels[channelName]
+    const listener = listeners[channelName]
+    channel && listener && channel.unsubscribe(listener)
+  }
+}
+
 module.exports = {
   Level,
   getChannelLogLevel,
+  subscribe,
+  unsubscribe,
 
   debugChannel: logChannels[Level.Debug],
   infoChannel: logChannels[Level.Info],

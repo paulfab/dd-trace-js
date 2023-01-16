@@ -4,7 +4,7 @@ const os = require('os')
 
 const { isTrue, calculateDDBasePath } = require('../util')
 const { sendData } = require('./send-data')
-const { Level, subscribe, unsubscribe } = require('../log_channels')
+const { Level, subscribe, unsubscribe } = require('../log/channels')
 
 // TODO: those config values can change via RC?
 const isLogCollectionEnabled = process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED

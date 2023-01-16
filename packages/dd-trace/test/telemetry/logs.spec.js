@@ -1,13 +1,13 @@
 const { expect } = require('chai')
 const proxyquire = require('proxyquire')
-const { Level } = require('../../src/log_channels')
+const { Level } = require('../../src/log/channels')
 
 describe('telemetry logs', () => {
   describe('start', () => {
     it('should be enabled by default and subscribe', () => {
       const subscribe = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
-        '../log_channels': { subscribe }
+        '../log/channels': { subscribe }
       })
       logs.start()
       expect(subscribe).to.have.been.calledOnce
@@ -18,7 +18,7 @@ describe('telemetry logs', () => {
 
       const subscribe = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
-        '../log_channels': { subscribe }
+        '../log/channels': { subscribe }
       })
       logs.start()
       expect(subscribe).to.not.have.been.called
@@ -29,7 +29,7 @@ describe('telemetry logs', () => {
     it('should subscribe default listeners', () => {
       const subscribe = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
-        '../log_channels': { subscribe }
+        '../log/channels': { subscribe }
       })
       logs.start()
 
@@ -44,7 +44,7 @@ describe('telemetry logs', () => {
 
       const subscribe = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
-        '../log_channels': { subscribe }
+        '../log/channels': { subscribe }
       })
       logs.start()
 
@@ -70,7 +70,7 @@ describe('telemetry logs', () => {
     it('should be called with WARN level', () => {
       const sendData = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
-        '../log_channels': { subscribe },
+        '../log/channels': { subscribe },
         './send-data': { sendData }
       })
       logs.start(config, app, host)
@@ -83,7 +83,7 @@ describe('telemetry logs', () => {
     it('should be called with ERROR level', () => {
       const sendData = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
-        '../log_channels': { subscribe },
+        '../log/channels': { subscribe },
         './send-data': { sendData }
       })
       logs.start(config, app, host)
@@ -96,7 +96,7 @@ describe('telemetry logs', () => {
     it('should be called with ERROR level and stack_trace', () => {
       const sendData = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
-        '../log_channels': { subscribe },
+        '../log/channels': { subscribe },
         './send-data': { sendData }
       })
       logs.start(config, app, host)
