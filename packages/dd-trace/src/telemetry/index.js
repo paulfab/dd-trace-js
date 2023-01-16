@@ -113,7 +113,7 @@ function start (aConfig, thePluginManager) {
   application = createAppObject()
   host = createHostObject()
   dependencies.start(config, application, host)
-  logs.start(config, application, host)
+  logs.start(config, application, host, HEARTBEAT_INTERVAL)
   sendData(config, application, host, 'app-started', appStarted())
   interval = setInterval(() => {
     sendData(config, application, host, 'app-heartbeat')

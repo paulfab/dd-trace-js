@@ -68,36 +68,42 @@ describe('telemetry logs', () => {
     }
 
     it('should be called with WARN level', () => {
-      const sendData = sinon.stub()
+      const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { subscribe },
-        './send-data': { sendData }
+        './log_collector': {
+          add: logCollectorAdd
+        }
       })
       logs.start(config, app, host)
 
       listeners[Level.Warn]('message')
 
-      expect(sendData).to.be.calledOnceWith(config, app, host, 'logs', { message: 'message', level: 'WARN' })
+      expect(logCollectorAdd).to.be.calledOnceWith('message', 'WARN')
     })
 
     it('should be called with ERROR level', () => {
-      const sendData = sinon.stub()
+      const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { subscribe },
-        './send-data': { sendData }
+        './log_collector': {
+          add: logCollectorAdd
+        }
       })
       logs.start(config, app, host)
 
       listeners[Level.Error]('message')
 
-      expect(sendData).to.be.calledOnceWith(config, app, host, 'logs', { message: 'message', level: 'ERROR' })
+      expect(logCollectorAdd).to.be.calledOnceWith('message', 'ERROR')
     })
 
     it('should be called with ERROR level and stack_trace', () => {
-      const sendData = sinon.stub()
+      const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { subscribe },
-        './send-data': { sendData }
+        './log_collector': {
+          add: logCollectorAdd
+        }
       })
       logs.start(config, app, host)
 
@@ -105,9 +111,7 @@ describe('telemetry logs', () => {
       const stack = error.stack
       listeners[Level.Error](error)
 
-      expect(sendData).to.be.calledOnceWith(config, app, host, 'logs', {
-        message: 'message', level: 'ERROR', stack_trace: logs.sanitizeStackTrace(stack)
-      })
+      expect(logCollectorAdd).to.be.calledOnceWith('message', 'ERROR', stack)
     })
   })
 })
