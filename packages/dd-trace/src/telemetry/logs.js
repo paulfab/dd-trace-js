@@ -2,7 +2,7 @@
 
 const { isTrue } = require('../util')
 const { sendData } = require('./send-data')
-const { Level, subscribe, unsubscribe } = require('../log/channels')
+const { debugChannel, infoChannel, warnChannel, errorChannel } = require('../log/channels')
 const logCollector = require('./log_collector')
 
 // TODO: those config values can change via RC?
@@ -14,12 +14,7 @@ const debugEnabled = process.env.TELEMETRY_DEBUG_ENABLED
   ? isTrue(process.env.TELEMETRY_DEBUG_ENABLED)
   : false
 
-const defaultListeners = {
-  [Level.Warn]: onWarn,
-  [Level.Error]: onError
-}
-
-let config, application, host, listeners, interval
+let config, application, host, interval
 
 function onDebug (message) {
   logCollector.add(message, 'DEBUG')
@@ -63,18 +58,16 @@ function start (aConfig, appplicationObject, hostObject, heartbeatInterval) {
   host = hostObject
 
   if (debugEnabled) {
-    listeners = Object.assign({}, defaultListeners, {
-      [Level.Debug]: onDebug,
-      [Level.Info]: onDebug
-    })
-  } else {
-    listeners = defaultListeners
+    debugChannel.subscribe(onDebug)
+    infoChannel.subscribe(onDebug)
   }
+  warnChannel.subscribe(onWarn)
+  errorChannel.subscribe(onError)
 
-  subscribe(listeners)
-
-  interval = setInterval(sendLogs, heartbeatInterval)
-  interval.unref()
+  if (heartbeatInterval) {
+    interval = setInterval(sendLogs, heartbeatInterval)
+    interval.unref()
+  }
 }
 
 function stop () {
@@ -83,9 +76,11 @@ function stop () {
   config = null
   application = null
   host = null
-  listeners = defaultListeners
 
-  unsubscribe(listeners)
+  debugChannel.unsubscribe(onDebug)
+  infoChannel.unsubscribe(onDebug)
+  warnChannel.unsubscribe(onWarn)
+  errorChannel.unsubscribe(onError)
 
   clearInterval(interval)
 }
