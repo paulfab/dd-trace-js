@@ -11,7 +11,7 @@ let maxEntries = 10000
 let overflowedCount = 0
 
 function sanitize (log, stack) {
-  if (stack === undefined) return
+  if (!stack) return
 
   let lines = stack.split(os.EOL)
 
@@ -26,15 +26,7 @@ function sanitize (log, stack) {
   }
 }
 
-function createHash (log) {
-  let hashSource = `${log.level}:${log.message}`
-  if (log.tags) {
-    hashSource += `:${log.tags}`
-  }
-  if (log.stack) {
-    hashSource += `:${log.stack}`
-  }
-
+function hashCode (hashSource) {
   let hash = 0
   let offset = 0
   const size = hashSource.length
@@ -42,6 +34,18 @@ function createHash (log) {
     hash = ((hash << 5) - hash) + hashSource.charCodeAt(offset++)
   }
   return hash
+}
+
+function createHash (log) {
+  if (!log) return 0
+
+  const prime = 31
+  let result = 1
+  result = prime * result + ((!log.level) ? 0 : hashCode(log.level))
+  result = prime * result + ((!log.message) ? 0 : hashCode(log.message))
+  result = prime * result + ((!log.tags) ? 0 : hashCode(log.tags))
+  result = prime * result + ((!log.stack) ? 0 : hashCode(log.stack))
+  return result
 }
 
 const logCollector = {

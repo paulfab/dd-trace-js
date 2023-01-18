@@ -1,11 +1,10 @@
 'use strict'
 
-const { isTrue } = require('../util')
-const { sendData } = require('./send-data')
 const { debugChannel, infoChannel, warnChannel, errorChannel } = require('../log/channels')
 const logCollector = require('./log_collector')
+const { sendData } = require('./send-data')
+const { isTrue } = require('../util')
 
-// TODO: those config values can change via RC?
 const isLogCollectionEnabled = process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED
   ? isTrue(process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED)
   : true
@@ -25,10 +24,6 @@ function onWarn (message) {
 }
 
 function onError (err) {
-  if (err instanceof Function) {
-    err = err()
-  }
-
   let message
   let stackTrace
   if (typeof err !== 'object' || !err) {
