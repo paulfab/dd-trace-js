@@ -6,7 +6,16 @@ const telemetry = require('./telemetry')
 const { getInstrumentedMetric, getExecutedMetric } = require('./telemetry/metrics')
 const { VULNERABILITY_TYPE, SOURCE_TYPE } = require('./telemetry/metric-tag')
 
-class IastSub {
+/**
+ * Used by vulnerability sources and sinks to subscribe diagnostic channel events
+ * and indicate what kind of metrics the subscription provides
+ * - moduleName is used identify when a module is loaded and
+ *    to increment the INSTRUMENTED_[SINK|SOURCE] metric when it occurs
+ * - channelName is the channel used by the hook to publish execution events
+ * - tag indicates the name of the metric: taint-tracking/source-types for Sources and analyzers type for Sinks
+ * - metricTag can be only SOURCE_TYPE (Source) or VULNERABILITY_TYPE (Sink)
+ */
+class IastPluginSubscription {
   constructor (moduleName, channelName, tag, metricTag) {
     this.moduleName = moduleName
     this.channelName = channelName
@@ -19,11 +28,11 @@ class IastPlugin extends Plugin {
   constructor () {
     super()
     this.configured = false
-    this.iastSubs = []
+    this.pluginSubs = []
   }
 
   _wrapHandler (handler, metric, tag) {
-    if (telemetry.isDebugEnabled()) {
+    if (telemetry.isDebugEnabled() && metric) {
       const originalHandler = handler
       handler = (message, name) => {
         originalHandler(message, name)
@@ -35,15 +44,20 @@ class IastPlugin extends Plugin {
       try {
         handler(message, name)
       } catch (e) {
-        log.debug(e)
+        log.error(e)
       }
     }
   }
 
   addSub (iastSub, handler) {
-    this.iastSubs.push(iastSub)
-    const metric = getExecutedMetric(iastSub.metricTag)
-    super.addSub(iastSub.channelName, this._wrapHandler(handler, metric, iastSub.tag))
+    if (typeof iastSub === 'string') {
+      super.addSub(iastSub, this._wrapHandler(handler))
+    } else {
+      iastSub = this.getSubscription(iastSub)
+      this.pluginSubs.push(iastSub)
+      const metric = getExecutedMetric(iastSub.metricTag)
+      super.addSub(iastSub.channelName, this._wrapHandler(handler, metric, iastSub.tag))
+    }
   }
 
   onConfigure () {}
@@ -53,7 +67,7 @@ class IastPlugin extends Plugin {
       this.onConfigure()
 
       if (telemetry.isEnabled()) {
-        this.enableTelemetry(telemetry)
+        this.enableTelemetry()
       }
       this.configured = true
     }
@@ -69,30 +83,23 @@ class IastPlugin extends Plugin {
       if (firstSep === -1) {
         moduleName = channelName
       } else {
-        moduleName = channelName.substring(firstSep + 1, channelName.indexOf(':', firstSep + 1))
+        const lastSep = channelName.indexOf(':', firstSep + 1)
+        moduleName = channelName.substring(firstSep + 1, lastSep !== -1 ? lastSep : channelName.length)
       }
     }
-    return new IastSub(moduleName, channelName, tag, metricTag)
+    return new IastPluginSubscription(moduleName, channelName, tag, metricTag)
   }
 
-  source (channelName, tag) {
-    return this.getSubscription({ channelName, tag, metricTag: SOURCE_TYPE })
-  }
-
-  sink (channelName, tag) {
-    return this.getSubscription({ channelName, tag, metricTag: VULNERABILITY_TYPE })
-  }
-
-  enableTelemetry (telemetry) {
+  enableTelemetry () {
     const { channel } = require('diagnostics_channel')
     const loadChannel = channel('dd-trace:instrumentation:load')
     loadChannel.subscribe(({ name }) =>
-      this.onInstrumentationLoaded(name, telemetry)
+      this.onInstrumentationLoaded(name)
     )
   }
 
-  onInstrumentationLoaded (name, telemetry) {
-    const subs = this.iastSubs.filter(sub => sub.moduleName.includes(name))
+  onInstrumentationLoaded (name) {
+    const subs = this.pluginSubs.filter(sub => sub.moduleName.includes(name))
     if (subs && subs.length) {
       subs.forEach(sub => {
         telemetry.increase(getInstrumentedMetric(sub.metricTag), sub.tag)
@@ -101,7 +108,20 @@ class IastPlugin extends Plugin {
   }
 }
 
+class SourceIastPlugin extends IastPlugin {
+  addSub (iastPluginSub, handler) {
+    return super.addSub({ metricTag: SOURCE_TYPE, ...iastPluginSub }, handler)
+  }
+}
+
+class SinkIastPlugin extends IastPlugin {
+  addSub (iastPluginSub, handler) {
+    return super.addSub({ metricTag: VULNERABILITY_TYPE, ...iastPluginSub }, handler)
+  }
+}
+
 module.exports = {
-  IastSub,
+  SourceIastPlugin,
+  SinkIastPlugin,
   IastPlugin
 }

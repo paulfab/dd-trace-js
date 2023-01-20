@@ -13,7 +13,7 @@ class WeakHashAnalyzer extends Analyzer {
   }
 
   onConfigure () {
-    this.addSub(this.sink('datadog:crypto:hashing:start'), ({ algorithm }) => this.analyze(algorithm))
+    this.addSub({ channelName: 'datadog:crypto:hashing:start' }, ({ algorithm }) => this.analyze(algorithm))
   }
 
   _isVulnerable (algorithm) {
