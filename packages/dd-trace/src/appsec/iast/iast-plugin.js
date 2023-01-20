@@ -35,8 +35,8 @@ class IastPlugin extends Plugin {
     if (telemetry.isDebugEnabled() && metric) {
       const originalHandler = handler
       handler = (message, name) => {
-        originalHandler(message, name)
         telemetry.increase(metric, tag)
+        originalHandler(message, name)
       }
     }
 
