@@ -7,6 +7,7 @@ const telemetry = require('./telemetry')
 module.exports = class IastPlugin extends Plugin {
   constructor (instrumentedMetric, executedMetric, executedMetricTag) {
     super()
+    this.configured = false
     this.instrumentedMetric = instrumentedMetric
     this.executedMetric = executedMetric
     this.executedMetricTag = executedMetricTag
@@ -37,7 +38,10 @@ module.exports = class IastPlugin extends Plugin {
   onConfigure () {}
 
   configure (config) {
-    this.onConfigure()
+    if (!this.configured) {
+      this.onConfigure()
+      this.configured = true
+    }
 
     if (telemetry.isEnabled()) {
       this.enableSinkTelemetry(telemetry)

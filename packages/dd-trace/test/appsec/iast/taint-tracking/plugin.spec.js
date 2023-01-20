@@ -20,6 +20,8 @@ describe('IAST Taint tracking plugin', () => {
       './operations': sinon.spy(taintTrackingOperations),
       '../../../../../datadog-core': datadogCore
     })
+
+    taintTrackingPlugin.onConfigure()
   })
 
   afterEach(sinon.restore)
