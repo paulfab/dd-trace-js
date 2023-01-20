@@ -22,7 +22,7 @@ class Telemetry {
   }
 
   increase (metric, tag) {
-    inc(metric.name, tag)
+    inc(metric, tag)
   }
 }
 

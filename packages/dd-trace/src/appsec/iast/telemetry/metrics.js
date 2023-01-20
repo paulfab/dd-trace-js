@@ -98,6 +98,14 @@ class TaggedMetric extends Metric {
   }
 }
 
+function getExecutedMetric (metricTag) {
+  return metricTag === VULNERABILITY_TYPE ? EXECUTED_SINK : EXECUTED_SOURCE
+}
+
+function getInstrumentedMetric (metricTag) {
+  return metricTag === VULNERABILITY_TYPE ? INSTRUMENTED_SINK : INSTRUMENTED_SOURCE
+}
+
 const INSTRUMENTED_PROPAGATION =
   new SingleMetric('instrumented.propagation', true, new ConflatedMetric())
 const INSTRUMENTED_SOURCE =
@@ -130,5 +138,8 @@ module.exports = {
   EXECUTED_SINK,
   EXECUTED_TAINTED,
   EXECUTION_TIME,
-  REQUEST_TAINTED
+  REQUEST_TAINTED,
+
+  getExecutedMetric,
+  getInstrumentedMetric
 }

@@ -7,7 +7,7 @@ class CommandInjectionAnalyzer extends InjectionAnalyzer {
   }
 
   onConfigure () {
-    this.addSub('datadog:child_process:execution:start', ({ command }) => this.analyze(command))
+    this.addSub(this.sink('datadog:child_process:execution:start'), ({ command }) => this.analyze(command))
   }
 }
 

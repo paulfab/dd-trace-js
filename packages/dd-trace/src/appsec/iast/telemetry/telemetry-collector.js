@@ -9,8 +9,14 @@ for (const iastMetricName in iastMetrics) {
   metrics.set(iastMetric.name, iastMetric)
 }
 
-function inc (metricName, tag) {
-  add(metrics.get(metricName), 1n, tag)
+function inc (metric, tag) {
+  if (!metric) return
+
+  if (typeof metric === 'string') {
+    add(metrics.get(metric), 1n, tag)
+  } else {
+    add(metric, 1n, tag)
+  }
 }
 
 function add (metric, value, tag) {

@@ -16,7 +16,7 @@ class WeakCipherAnalyzer extends Analyzer {
   }
 
   onConfigure () {
-    this.addSub('datadog:crypto:cipher:start', ({ algorithm }) => this.analyze(algorithm))
+    this.addSub(this.sink('datadog:crypto:cipher:start'), ({ algorithm }) => this.analyze(algorithm))
   }
 
   _isVulnerable (algorithm) {

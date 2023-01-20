@@ -7,9 +7,9 @@ class SqlInjectionAnalyzer extends InjectionAnalyzer {
   }
 
   onConfigure () {
-    this.addSub('apm:mysql:query:start', ({ sql }) => this.analyze(sql))
-    this.addSub('apm:mysql2:query:start', ({ sql }) => this.analyze(sql))
-    this.addSub('apm:pg:query:start', ({ originalQuery }) => this.analyze(originalQuery))
+    this.addSub(this.sink('apm:mysql:query:start'), ({ sql }) => this.analyze(sql))
+    this.addSub(this.sink('apm:mysql2:query:start'), ({ sql }) => this.analyze(sql))
+    this.addSub(this.sink('apm:pg:query:start'), ({ originalQuery }) => this.analyze(originalQuery))
   }
 }
 

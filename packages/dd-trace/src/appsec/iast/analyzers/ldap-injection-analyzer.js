@@ -7,7 +7,7 @@ class LdapInjectionAnalyzer extends InjectionAnalyzer {
   }
 
   onConfigure () {
-    this.addSub('datadog:ldapjs:client:search', ({ base, filter }) => this.analyzeAll(base, filter))
+    this.addSub(this.sink('datadog:ldapjs:client:search'), ({ base, filter }) => this.analyzeAll(base, filter))
   }
 }
 
