@@ -6,6 +6,7 @@ const overheadController = require('./overhead-controller')
 const dc = require('diagnostics_channel')
 const iastContextFunctions = require('./iast-context')
 const { enableTaintTracking, disableTaintTracking, createTransaction, removeTransaction } = require('./taint-tracking')
+const telemetry = require('./telemetry')
 
 const IAST_ENABLED_TAG_KEY = '_dd.iast.enabled'
 
@@ -15,6 +16,7 @@ const requestStart = dc.channel('dd-trace:incomingHttpRequestStart')
 const requestClose = dc.channel('dd-trace:incomingHttpRequestEnd')
 
 function enable (config) {
+  telemetry.configure(config)
   enableAllAnalyzers()
   enableTaintTracking()
   requestStart.subscribe(onIncomingHttpRequestStart)
