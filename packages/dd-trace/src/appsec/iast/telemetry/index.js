@@ -1,7 +1,8 @@
 'use strict'
 
+const metrics = require('../../../telemetry/metrics')
 const { Verbosity, isDebugAllowed, parseVerbosity } = require('./verbosity')
-const { inc } = require('./telemetry-collector')
+const { inc, drain } = require('./telemetry-collector')
 
 const iastTelemetryVerbosity = process.env.DD_IAST_TELEMETRY_VERBOSITY
   ? parseVerbosity(process.env.DD_IAST_TELEMETRY_VERBOSITY)
@@ -11,6 +12,7 @@ class Telemetry {
   configure (config) {
     this.enabled = config.telemetryEnabled
     this.verbosity = config.iastTelemetryVerbosity ?? iastTelemetryVerbosity
+    metrics.registerProvider(drain)
   }
 
   isEnabled () {

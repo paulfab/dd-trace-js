@@ -12,7 +12,8 @@ class Point {
 
 class ConflatedMetric {
   constructor () {
-    this.value = 0n
+    // TODO: should be a BigInt?
+    this.value = 0
   }
 
   add (value) {
@@ -21,8 +22,8 @@ class ConflatedMetric {
 
   drain () {
     const current = this.value
-    this.value = 0n
-    return current !== 0n ? [new Point(current)] : []
+    this.value = 0
+    return current !== 0 ? [new Point(current)] : []
   }
 }
 
@@ -128,7 +129,7 @@ const EXECUTION_TIME =
 const REQUEST_TAINTED =
   new SingleMetric('request.tainted', true, new AggregatedMetric())
 
-module.exports = {
+const Metrics = {
   INSTRUMENTED_PROPAGATION,
   INSTRUMENTED_SOURCE,
   INSTRUMENTED_SINK,
@@ -138,7 +139,14 @@ module.exports = {
   EXECUTED_SINK,
   EXECUTED_TAINTED,
   EXECUTION_TIME,
-  REQUEST_TAINTED,
+  REQUEST_TAINTED
+}
+
+module.exports = {
+  Metrics,
+
+  TaggedMetric,
+  SingleMetric,
 
   getExecutedMetric,
   getInstrumentedMetric
