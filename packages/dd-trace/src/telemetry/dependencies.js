@@ -3,7 +3,6 @@
 const path = require('path')
 const parse = require('module-details-from-path')
 const requirePackageJson = require('../require-package-json')
-const { sendData } = require('./send-data')
 const dc = require('diagnostics_channel')
 const { fileURLToPath } = require('url')
 const TelemetryPlugin = require('./plugin')
@@ -13,28 +12,6 @@ const detectedDependencyNames = new Set()
 const FILE_URI_START = `file://`
 const moduleLoadStartChannel = dc.channel('dd-trace:moduleLoadStart')
 
-let immediate
-
-function waitAndSend (config, application, host) {
-  if (!immediate) {
-    immediate = setImmediate(() => {
-      immediate = null
-      if (savedDependencies.size > 0) {
-        const dependencies = Array.from(savedDependencies.values()).splice(0, 1000).map(pair => {
-          savedDependencies.delete(pair)
-          const [name, version] = pair.split(' ')
-          return { name, version }
-        })
-        sendData(config, application, host, 'app-dependencies-loaded', { dependencies })
-        if (savedDependencies.size > 0) {
-          waitAndSend(config, application, host)
-        }
-      }
-    })
-    immediate.unref()
-  }
-}
-
 function isDependency (filename, request) {
   const isDependencyWithSlash = isDependencyWithSeparator(filename, request, '/')
   if (isDependencyWithSlash && process.platform === 'win32') {
@@ -42,6 +19,7 @@ function isDependency (filename, request) {
   }
   return isDependencyWithSlash
 }
+
 function isDependencyWithSeparator (filename, request, sep) {
   return request.indexOf(`..${sep}`) !== 0 &&
     request.indexOf(`.${sep}`) !== 0 &&
@@ -88,13 +66,33 @@ class DependenciesTelemetryPlugin extends TelemetryPlugin {
             try {
               const { version } = requirePackageJson(basedir, module)
               savedDependencies.add(`${name} ${version}`)
-              waitAndSend(this.config, this.application, this.host)
+              this.waitAndSend()
             } catch (e) {
               // can not read the package.json, do nothing
             }
           }
         }
       }
+    }
+  }
+
+  waitAndSend () {
+    if (!this.immediate) {
+      this.immediate = setImmediate(() => {
+        this.immediate = null
+        if (savedDependencies.size > 0) {
+          const dependencies = Array.from(savedDependencies.values()).splice(0, 1000).map(pair => {
+            savedDependencies.delete(pair)
+            const [name, version] = pair.split(' ')
+            return { name, version }
+          })
+          this.send({ dependencies })
+          if (savedDependencies.size > 0) {
+            this.waitAndSend()
+          }
+        }
+      })
+      this.immediate.unref()
     }
   }
 }

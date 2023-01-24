@@ -23,11 +23,15 @@ module.exports = class TelemetryPlugin {
     try {
       const payload = this.getPayload()
       if (payload) {
-        sendData(this.config, this.application, this.host, this.reqType, payload)
+        this.send(payload)
       }
     } catch (e) {
       log.error(e)
     }
+  }
+
+  send (payload) {
+    sendData(this.config, this.application, this.host, this.reqType, payload)
   }
 
   onStart () { return true }
