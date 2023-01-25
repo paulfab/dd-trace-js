@@ -26,6 +26,21 @@ class Telemetry {
   increase (metric, tag) {
     inc(metric, tag)
   }
+
+  wrap (handler, thisArg, metric, tag) {
+    const telemetry = this
+    return function () {
+      telemetry.increase(metric, tag)
+      return handler.apply(thisArg, arguments)
+    }
+  }
+
+  wrapObject (object, metric, tag) {
+    for (const method in object) {
+      object[method] = this.wrap(object[method], object, metric, tag)
+    }
+    return object
+  }
 }
 
 module.exports = new Telemetry()

@@ -1,6 +1,6 @@
 const TaintedUtils = require('@datadog/native-iast-taint-tracking')
 const { IAST_TRANSACTION_ID } = require('../iast-context')
-const { TaintTracking, TaintTrackingDummy } = require('./taint-tracking-impl')
+const { TaintTracking, TaintTrackingDebug, TaintTrackingDummy } = require('./taint-tracking-impl')
 
 function createTransaction (id, iastContext) {
   if (id && iastContext) {
@@ -77,8 +77,10 @@ function getRanges (iastContext, string) {
   return result
 }
 
-function enableTaintOperations () {
-  global._ddiast = TaintTracking
+function enableTaintOperations (debugEnabled) {
+  global._ddiast = debugEnabled
+    ? TaintTrackingDebug
+    : TaintTracking
 }
 
 function disableTaintOperations () {

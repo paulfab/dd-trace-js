@@ -3,9 +3,9 @@ const { createTransaction, removeTransaction, enableTaintOperations, disableTain
 const taintTrackingPlugin = require('./plugin')
 
 module.exports = {
-  enableTaintTracking () {
+  enableTaintTracking (debugEnabled) {
     enableRewriter()
-    enableTaintOperations()
+    enableTaintOperations(debugEnabled)
     taintTrackingPlugin.enable()
   },
   disableTaintTracking () {

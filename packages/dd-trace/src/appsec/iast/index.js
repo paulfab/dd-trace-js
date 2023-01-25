@@ -18,7 +18,7 @@ const requestClose = dc.channel('dd-trace:incomingHttpRequestEnd')
 function enable (config) {
   telemetry.configure(config)
   enableAllAnalyzers()
-  enableTaintTracking()
+  enableTaintTracking(telemetry.isDebugEnabled())
   requestStart.subscribe(onIncomingHttpRequestStart)
   requestClose.subscribe(onIncomingHttpRequestEnd)
   overheadController.configure(config.iast)

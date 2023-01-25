@@ -1,4 +1,5 @@
 'use strict'
+const { channel } = require('diagnostics_channel')
 
 const log = require('../../log')
 const Plugin = require('../../plugins/plugin')
@@ -33,11 +34,7 @@ class IastPlugin extends Plugin {
 
   _wrapHandler (handler, metric, tag) {
     if (telemetry.isDebugEnabled() && metric) {
-      const originalHandler = handler
-      handler = (message, name) => {
-        telemetry.increase(metric, tag)
-        originalHandler(message, name)
-      }
+      handler = telemetry.wrap(handler, this, metric, tag)
     }
 
     return (message, name) => {
@@ -91,11 +88,18 @@ class IastPlugin extends Plugin {
   }
 
   enableTelemetry () {
-    const { channel } = require('diagnostics_channel')
     const loadChannel = channel('dd-trace:instrumentation:load')
-    loadChannel.subscribe(({ name }) =>
-      this.onInstrumentationLoaded(name)
-    )
+    this.onInstrumentationLoadedListener = ({ name }) => this.onInstrumentationLoaded(name)
+    loadChannel.subscribe(this.onInstrumentationLoadedListener)
+  }
+
+  disableTelemetry () {
+    if (this.onInstrumentationLoadedListener) {
+      const loadChannel = channel('dd-trace:instrumentation:load')
+      if (loadChannel.hasSubscribers) {
+        loadChannel.unsubscribe(this.onInstrumentationLoadedListener)
+      }
+    }
   }
 
   onInstrumentationLoaded (name) {

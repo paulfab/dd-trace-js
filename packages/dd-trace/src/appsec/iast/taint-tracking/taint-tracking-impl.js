@@ -4,6 +4,8 @@ const TaintedUtils = require('@datadog/native-iast-taint-tracking')
 const { storage } = require('../../../../../datadog-core')
 const iastContextFunctions = require('../iast-context')
 const log = require('../../../log')
+const telemetry = require('../telemetry')
+const { Metrics } = require('../telemetry/metrics')
 
 function noop (res) { return res }
 const TaintTrackingDummy = {
@@ -97,7 +99,10 @@ const TaintTracking = {
   ...csiMethodsOverrides
 }
 
+const TaintTrackingDebug = telemetry.wrapObject(TaintTracking, Metrics.EXECUTED_PROPAGATION)
+
 module.exports = {
   TaintTracking,
+  TaintTrackingDebug,
   TaintTrackingDummy
 }

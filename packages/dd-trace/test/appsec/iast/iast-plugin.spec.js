@@ -44,6 +44,10 @@ describe('IAST Plugin', () => {
       iastPlugin = new IastPlugin()
     })
 
+    afterEach(() => {
+      iastPlugin.disableTelemetry()
+    })
+
     describe('addSub', () => {
       it('should call Plugin.addSub with channelName and wrapped handler', () => {
         iastPlugin.addSub('test', handler)
@@ -117,34 +121,44 @@ describe('IAST Plugin', () => {
   })
 
   describe('with telemetry enabled', () => {
-    const increaseMock = sinon.stub()
+    const telemetry = require('../../../src/appsec/iast/telemetry')
+    let isEnabledMock
+    let isDebugEnabledMock
+    let increaseMock
+
     const { IastPlugin } = proxyquire('../../../src/appsec/iast/iast-plugin', {
       '../../plugins/plugin': PluginClass,
       '../../log': {
         error: logErrorMock
       },
-      './telemetry': {
-        increase: increaseMock,
-        isEnabled: () => true,
-        isDebugEnabled: () => true
-      }
+      './telemetry': telemetry
     })
 
     beforeEach(() => {
       iastPlugin = new IastPlugin()
+      isEnabledMock = sinon.stub(telemetry, 'isEnabled').returns(true)
+      isDebugEnabledMock = sinon.stub(telemetry, 'isDebugEnabled').returns(true)
+      increaseMock = sinon.stub(telemetry, 'increase')
       increaseMock.reset()
+    })
+
+    afterEach(() => {
+      iastPlugin.disableTelemetry()
+      increaseMock.restore()
+      isEnabledMock.restore()
+      isDebugEnabledMock.restore()
     })
 
     describe('configure', () => {
       it('should subscribe dd-trace:instrumentation:load channel', () => {
-        iastPlugin.onInstrumentationLoaded = sinon.stub()
+        const onInstrumentationLoadedMock = sinon.stub(iastPlugin, 'onInstrumentationLoaded')
         iastPlugin.configure(true)
         iastPlugin.configure(false)
         iastPlugin.configure(true)
 
         loadChannel.publish({ name: 'test' })
 
-        expect(iastPlugin.onInstrumentationLoaded).to.be.calledOnceWith('test')
+        expect(onInstrumentationLoadedMock).to.be.calledOnceWith('test')
       })
     })
 
@@ -155,7 +169,7 @@ describe('IAST Plugin', () => {
           channelName: 'datadog:sink:start',
           tag: 'injection',
           metricTag: VULNERABILITY_TYPE
-        })
+        }, handler)
         iastPlugin.configure(true)
 
         loadChannel.publish({ name: 'sink' })
@@ -169,7 +183,7 @@ describe('IAST Plugin', () => {
           channelName: 'datadog:source:start',
           tag: 'http.source',
           metricTag: SOURCE_TYPE
-        })
+        }, handler)
         iastPlugin.configure(true)
 
         loadChannel.publish({ name: 'source' })
