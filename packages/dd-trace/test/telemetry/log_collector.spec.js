@@ -1,8 +1,8 @@
 const { expect } = require('chai')
-const os = require('os')
 const { calculateDDBasePath } = require('../../src/util')
 
 const ddBasePath = calculateDDBasePath(__dirname)
+const EOL = '\n'
 
 describe('telemetry log collector', () => {
   const logCollector = require('../../src/telemetry/log_collector')
@@ -25,14 +25,16 @@ describe('telemetry log collector', () => {
     })
 
     it('should include original message and dd frames', () => {
-      const stack = new Error('Error 1').stack
+      const thirdPartyFrame = `at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
+      const stack = new Error('Error 1')
+        .stack.replace(`Error 1${EOL}`, `Error 1${EOL}${thirdPartyFrame}${EOL}`)
       logCollector.add('Error 1', 'ERROR', stack)
 
       const log = logCollector.drain()[0]
       expect(log.message).equal('Error 1')
       expect(log.stack_trace).to.not.be.undefined
 
-      log.stack_trace.split(os.EOL).forEach((frame, index) => {
+      log.stack_trace.split(EOL).forEach((frame, index) => {
         if (index === 0) return
         expect(frame).to.contain(ddBasePath)
       })
@@ -41,14 +43,14 @@ describe('telemetry log collector', () => {
     it('should not include original message if first frame is not a dd frame', () => {
       const thirdPartyFrame = 'at callFn (/this/is/not/a/dd/frame/runnable.js:366:21)'
       const stack = new Error('Error 1')
-        .stack.replace(`Error 1${os.EOL}`, `Error 1${os.EOL}${thirdPartyFrame}${os.EOL}`)
+        .stack.replace(`Error 1${EOL}`, `Error 1${EOL}${thirdPartyFrame}${EOL}`)
 
       logCollector.add('Error 1', 'ERROR', stack)
       const log = logCollector.drain()[0]
       expect(log.message).equal('omitted')
       expect(log.stack_trace).to.not.be.undefined
 
-      log.stack_trace.split(os.EOL).forEach((frame, index) => {
+      log.stack_trace.split(EOL).forEach((frame, index) => {
         if (index === 0) return
         expect(frame).to.contain(ddBasePath)
       })

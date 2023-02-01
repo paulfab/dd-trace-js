@@ -16,8 +16,11 @@ const memoize = func => {
   return memoized
 }
 
-function processMsg (msg) {
-  return typeof msg === 'function' ? msg() : msg
+function processMsg (msg, options) {
+  return {
+    message: typeof msg === 'function' ? msg() : msg,
+    options
+  }
 }
 
 const log = {
@@ -34,43 +37,60 @@ const log = {
   reset () {
     logWriter.reset()
     this._deprecate = memoize((code, message) => {
-      errorChannel.publish(message)
+      errorChannel.publish(processMsg(message))
       return true
     })
 
     return this
   },
 
-  debug (message) {
+  debug (message, options) {
     if (debugChannel.hasSubscribers) {
-      debugChannel.publish(processMsg(message))
+      debugChannel.publish(processMsg(message, options))
     }
     return this
   },
 
-  info (message) {
+  info (message, options) {
     if (infoChannel.hasSubscribers) {
-      infoChannel.publish(processMsg(message))
+      infoChannel.publish(processMsg(message, options))
     }
     return this
   },
 
-  warn (message) {
+  warn (message, options) {
     if (warnChannel.hasSubscribers) {
-      warnChannel.publish(processMsg(message))
+      warnChannel.publish(processMsg(message, options))
     }
     return this
   },
 
-  error (err) {
+  error (err, options) {
     if (errorChannel.hasSubscribers) {
-      errorChannel.publish(processMsg(err))
+      errorChannel.publish(processMsg(err, options))
     }
     return this
   },
 
   deprecate (code, message) {
     return this._deprecate(code, message)
+  },
+
+  with (defaultOptions) {
+    return {
+      debug: (message, options) => {
+        return this.debug(message, { ...defaultOptions, ...options })
+      },
+      info: (message, options) => {
+        return this.info(message, { ...defaultOptions, ...options })
+      },
+      warn: (message, options) => {
+        return this.warn(message, { ...defaultOptions, ...options })
+      },
+      error: (err, options) => {
+        return this.error(err, { ...defaultOptions, ...options })
+      }
+    }
   }
 }
 

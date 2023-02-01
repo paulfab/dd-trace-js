@@ -142,8 +142,13 @@ function updateIntegrations () {
   sendData(config, application, host, 'app-integrations-change', { integrations })
 }
 
+const SEND_TELEMETRY_MARK = {
+  SEND_TELEMETRY: true
+}
+
 module.exports = {
   start,
   stop,
+  SEND_TELEMETRY_MARK,
   updateIntegrations
 }

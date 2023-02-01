@@ -1,6 +1,7 @@
 'use strict'
 
 const { debugChannel, infoChannel, warnChannel, errorChannel } = require('../log/channels')
+
 const logCollector = require('./log_collector')
 const { sendData } = require('./send-data')
 const { isTrue } = require('../util')
@@ -15,15 +16,26 @@ const debugEnabled = process.env.TELEMETRY_DEBUG_ENABLED
 
 let config, application, host, interval
 
-function onDebug (message) {
-  logCollector.add(message, 'DEBUG')
+function sendTelemetry (messageObj) {
+  return messageObj.options &&
+    messageObj.options.SEND_TELEMETRY
 }
 
-function onWarn (message) {
-  logCollector.add(message, 'WARN')
+function onDebug (messageObj) {
+  if (sendTelemetry(messageObj)) {
+    logCollector.add(messageObj.message, 'DEBUG')
+  }
 }
 
-function onError (err) {
+function onWarn (messageObj) {
+  if (sendTelemetry(messageObj)) {
+    logCollector.add(messageObj.message, 'WARN')
+  }
+}
+
+function onError (errObj) {
+  const err = errObj.message
+
   let message
   let stackTrace
   if (typeof err !== 'object' || !err) {

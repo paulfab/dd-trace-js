@@ -1,25 +1,33 @@
 'use strict'
 
-const os = require('os')
 const { calculateDDBasePath } = require('../util')
 
 const ddBasePath = calculateDDBasePath(__dirname)
+const EOL = '\n'
 
 const logs = new Map()
 
+// NOTE: Is this a reasonable number?
 let maxEntries = 10000
 let overflowedCount = 0
 
 function sanitize (log, stack) {
   if (!stack) return
 
-  let lines = stack.split(os.EOL)
+  let stackLines = stack.split(EOL)
 
-  // lines[0] ommited because it usually contains Error.message
-  const isDDCode = lines[1].includes(ddBasePath)
-  lines = lines.filter((line, index) => (isDDCode && index === 0) || line.includes(ddBasePath))
+  let firstIndex = -1
+  for (let i = 0; i < stackLines.length; i++) {
+    if (stackLines[i].match(/^\s*at/gm)) {
+      firstIndex = i
+      break
+    }
+  }
 
-  log['stack_trace'] = lines.join(os.EOL)
+  const isDDCode = firstIndex > -1 ? stackLines[firstIndex].includes(ddBasePath) : false
+  stackLines = stackLines.filter((line, index) => (isDDCode && index < firstIndex) || line.includes(ddBasePath))
+
+  log['stack_trace'] = stackLines.join(EOL)
 
   if (!isDDCode) {
     log['message'] = 'omitted'
@@ -43,7 +51,9 @@ function createHash (log) {
   let result = 1
   result = prime * result + ((!log.level) ? 0 : hashCode(log.level))
   result = prime * result + ((!log.message) ? 0 : hashCode(log.message))
-  result = prime * result + ((!log.tags) ? 0 : hashCode(log.tags))
+
+  // NOTE: tags are not used at the moment
+  // result = prime * result + ((!log.tags) ? 0 : hashCode(log.tags))
   result = prime * result + ((!log.stack) ? 0 : hashCode(log.stack))
   return result
 }
@@ -52,6 +62,7 @@ const logCollector = {
   add (message, level, stack, tags) {
     if (!message) return
 
+    // NOTE: should errors have higher priority?
     if (logs.size >= maxEntries) {
       overflowedCount++
       return

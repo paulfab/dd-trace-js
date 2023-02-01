@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const proxyquire = require('proxyquire')
+const { SEND_TELEMETRY_MARK } = require('../../src/telemetry')
 
 describe('telemetry logs', () => {
   const errorChannel = {
@@ -139,6 +140,13 @@ describe('telemetry logs', () => {
       }
     }
 
+    function processMsg (message, options) {
+      return {
+        message,
+        options
+      }
+    }
+
     it('should be called with WARN level', () => {
       const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
@@ -149,7 +157,7 @@ describe('telemetry logs', () => {
       })
       logs.start(config, app, host)
 
-      onWarn('message')
+      onWarn(processMsg('message', SEND_TELEMETRY_MARK))
 
       expect(logCollectorAdd).to.be.calledOnceWith('message', 'WARN')
     })
@@ -164,7 +172,7 @@ describe('telemetry logs', () => {
       })
       logs.start(config, app, host)
 
-      onError('message')
+      onError(processMsg('message'))
 
       expect(logCollectorAdd).to.be.calledOnceWith('message', 'ERROR')
     })
@@ -181,7 +189,7 @@ describe('telemetry logs', () => {
 
       const error = new Error('message')
       const stack = error.stack
-      onError(error)
+      onError(processMsg(error))
 
       expect(logCollectorAdd).to.be.calledOnceWith('message', 'ERROR', stack)
     })

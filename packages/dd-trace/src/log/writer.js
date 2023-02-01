@@ -77,8 +77,9 @@ function reset () {
   toggleSubscription(false)
 }
 
-function onError (err) {
+function onError (errObj) {
   if (enabled) {
+    let err = errObj.message
     if (typeof err !== 'object' || !err) {
       err = String(err)
     } else if (!err.stack) {
@@ -93,23 +94,23 @@ function onError (err) {
   }
 }
 
-function onWarn (message) {
-  if (!logger.warn) return onDebug(message)
+function onWarn (messageObj) {
+  if (!logger.warn) return onDebug(messageObj)
   if (enabled) {
-    withNoop(() => logger.warn(message))
+    withNoop(() => logger.warn(messageObj.message))
   }
 }
 
-function onInfo (message) {
-  if (!logger.info) return onDebug(message)
+function onInfo (messageObj) {
+  if (!logger.info) return onDebug(messageObj)
   if (enabled) {
-    withNoop(() => logger.info(message))
+    withNoop(() => logger.info(messageObj.message))
   }
 }
 
-function onDebug (message) {
+function onDebug (messageObj) {
   if (enabled) {
-    withNoop(() => logger.debug(message))
+    withNoop(() => logger.debug(messageObj.message))
   }
 }
 
