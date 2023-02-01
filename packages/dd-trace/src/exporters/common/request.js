@@ -95,6 +95,7 @@ function request (data, options, callback) {
     const req = client.request(options, onResponse)
 
     req.once('error', err => {
+      console.log('req.once("error"):', err)
       activeRequests--
       onError(err)
     })

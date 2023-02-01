@@ -75,7 +75,11 @@ function getCommitsToExclude ({ url, isEvpProxy, repositoryUrl }, callback) {
     }))
   })
 
+  console.log('request to search_commits: ', localCommitData)
+
   request(localCommitData, options, (err, response) => {
+    console.log('response from search_commits err: ', err)
+    console.log('response from search_commits response: ', response)
     if (err) {
       const error = new Error(`Error fetching commits to exclude: ${err.message}`)
       return callback(error)
@@ -138,6 +142,8 @@ function uploadPackFile ({ url, isEvpProxy, packFileToUpload, repositoryUrl, hea
     delete options.headers['dd-api-key']
   }
 
+  console.log('request to repository/packfile: ', options)
+
   request(form, options, (err, _, statusCode) => {
     if (err) {
       const error = new Error(`Could not upload packfiles: status code ${statusCode}: ${err.message}`)
@@ -163,12 +169,14 @@ function sendGitMetadata (url, isEvpProxy, callback) {
     }
     const commitsToUpload = getCommitsToUpload(commitsToExclude)
 
+    console.log('commits to upload: ', commitsToUpload)
     if (!commitsToUpload.length) {
       log.debug('No commits to upload')
       return callback(null)
     }
     const packFilesToUpload = generatePackFilesForCommits(commitsToUpload)
 
+    console.log('packfiles to upload: ', packFilesToUpload)
     if (!packFilesToUpload.length) {
       return callback(new Error('Failed to generate packfiles'))
     }

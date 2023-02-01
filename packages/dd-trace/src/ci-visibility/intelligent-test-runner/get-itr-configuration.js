@@ -64,7 +64,11 @@ function getItrConfiguration ({
     }
   })
 
+  console.log('request to ITR config:', data)
+
   request(data, options, (err, res) => {
+    console.log('response from ITR config err:', err)
+    console.log('response from ITR config data:', res)
     if (err) {
       done(err)
     } else {
