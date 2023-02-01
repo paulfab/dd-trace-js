@@ -145,6 +145,7 @@ function uploadPackFile ({ url, isEvpProxy, packFileToUpload, repositoryUrl, hea
   console.log('request to repository/packfile: ', options)
 
   request(form, options, (err, _, statusCode) => {
+    console.log('response to packfile err, statusCode: ', err, statusCode)
     if (err) {
       const error = new Error(`Could not upload packfiles: status code ${statusCode}: ${err.message}`)
       return callback(error)
