@@ -61,7 +61,11 @@ function getSkippableSuites ({
     }
   })
 
+  console.log('request to skippable: ', data)
+
   request(data, options, (err, res) => {
+    console.log('response from skippable err: ', err)
+    console.log('response from skippable res: ', res)
     if (err) {
       done(err)
     } else {
