@@ -1,0 +1,36 @@
+raw
+
+ADD HOOK body-parser [ '>=1' ] lib/read.js [Function (anonymous)]
+ADD HOOK https undefined undefined [Function: hookFn]
+ADD HOOK http undefined undefined [Function: hookFn]
+ADD HOOK https undefined undefined [Function (anonymous)]
+ADD HOOK http undefined undefined [Function (anonymous)]
+ADD HOOK net undefined undefined [Function (anonymous)]
+ADD HOOK dns undefined undefined [Function (anonymous)]
+ADD HOOK router [ '>=1' ] undefined [Function (anonymous)]
+ADD HOOK express [ '>=4' ] undefined [Function (anonymous)]
+ADD HOOK qs [ '>=1' ] undefined [Function (anonymous)]
+ADD HOOK fs undefined undefined [Function (anonymous)]
+ADD HOOK crypto undefined undefined [Function (anonymous)]
+ADD HOOK @redis/client [ '>=1.1' ] dist/lib/client/commands-queue.js [Function (anonymous)]
+ADD HOOK @node-redis/client [ '>=1' ] dist/lib/client/commands-queue.js [Function (anonymous)]
+ADD HOOK redis [ '>=2.6 <4' ] undefined [Function (anonymous)]
+ADD HOOK redis [ '>=0.12 <2.6' ] undefined [Function (anonymous)]
+ADD HOOK pg [ '>=8.0.3' ] undefined [Function (anonymous)]
+ADD HOOK pg [ '>=8.0.3' ] lib/native/index.js [Function (anonymous)]
+
+built
+
+ADD HOOK https undefined undefined [Function: hookFn]
+ADD HOOK http undefined undefined [Function: hookFn]
+ADD HOOK https undefined undefined [Function (anonymous)]
+ADD HOOK http undefined undefined [Function (anonymous)]
+ADD HOOK net undefined undefined [Function (anonymous)]
+ADD HOOK dns undefined undefined [Function (anonymous)]
+ADD HOOK fs undefined undefined [Function (anonymous)]
+ADD HOOK crypto undefined undefined [Function (anonymous)]
+onModuleLoad(express@4.18.2)
+ADD HOOK winston [ '>=3' ] lib/winston/logger.js [Function (anonymous)]
+ADD HOOK winston [ '1', '2' ] lib/winston/logger.js [Function (anonymous)]
+onModuleLoad(redis@4.5.1)
+onModuleLoad(pg@8.9.0)

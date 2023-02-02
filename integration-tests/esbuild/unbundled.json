@@ -1,0 +1,150 @@
+[
+    {
+        "trace_id": "27e4a27fd89293fd",
+        "span_id": "27e4a27fd89293fd",
+        "parent_id": "0000000000000000",
+        "name": "express.request",
+        "resource": "GET",
+        "error": 0,
+        "meta": {
+            "_dd.p.dm": "-0",
+            "service": "esbuild-demo",
+            "version": "1.0.0",
+            "runtime-id": "868c61aa-fac2-4b63-b5e4-0f002968f3c9",
+            "component": "express",
+            "http.url": "http://localhost:3000/",
+            "http.method": "GET",
+            "span.kind": "server",
+            "http.useragent": "curl/7.85.0",
+            "http.status_code": "200",
+            "language": "javascript"
+        },
+        "metrics": {
+            "_dd.agent_psr": 1,
+            "_dd.top_level": 1,
+            "_dd.measured": 1,
+            "process_id": 22336,
+            "_sampling_priority_v1": 1
+        },
+        "start": 1672269972277003500,
+        "duration": 10872803,
+        "service": "esbuild-demo",
+        "type": "web"
+    },
+    {
+        "trace_id": "27e4a27fd89293fd",
+        "span_id": "1cfd793036cb56d9",
+        "parent_id": "27e4a27fd89293fd",
+        "name": "express.middleware",
+        "resource": "query",
+        "error": 0,
+        "meta": {
+            "service": "esbuild-demo",
+            "version": "1.0.0",
+            "runtime-id": "868c61aa-fac2-4b63-b5e4-0f002968f3c9",
+            "component": "express",
+            "language": "javascript"
+        },
+        "metrics": {
+            "process_id": 22336,
+            "_sampling_priority_v1": 1
+        },
+        "start": 1672269972278019000,
+        "duration": 394043,
+        "service": "esbuild-demo"
+    },
+    {
+        "trace_id": "27e4a27fd89293fd",
+        "span_id": "2638452f7c43d118",
+        "parent_id": "27e4a27fd89293fd",
+        "name": "express.middleware",
+        "resource": "expressInit",
+        "error": 0,
+        "meta": {
+            "service": "esbuild-demo",
+            "version": "1.0.0",
+            "runtime-id": "868c61aa-fac2-4b63-b5e4-0f002968f3c9",
+            "component": "express",
+            "language": "javascript"
+        },
+        "metrics": {
+            "process_id": 22336,
+            "_sampling_priority_v1": 1
+        },
+        "start": 1672269972278451000,
+        "duration": 90332,
+        "service": "esbuild-demo"
+    },
+    {
+        "trace_id": "27e4a27fd89293fd",
+        "span_id": "76a16482e95f3315",
+        "parent_id": "27e4a27fd89293fd",
+        "name": "express.middleware",
+        "resource": "bound dispatch",
+        "error": 0,
+        "meta": {
+            "service": "esbuild-demo",
+            "version": "1.0.0",
+            "runtime-id": "868c61aa-fac2-4b63-b5e4-0f002968f3c9",
+            "component": "express",
+            "language": "javascript"
+        },
+        "metrics": {
+            "process_id": 22336,
+            "_sampling_priority_v1": 1
+        },
+        "start": 1672269972278821600,
+        "duration": 9080322,
+        "service": "esbuild-demo"
+    },
+    {
+        "trace_id": "27e4a27fd89293fd",
+        "span_id": "3536b2009571b60c",
+        "parent_id": "76a16482e95f3315",
+        "name": "express.middleware",
+        "resource": "<anonymous>",
+        "error": 0,
+        "meta": {
+            "service": "esbuild-demo",
+            "version": "1.0.0",
+            "runtime-id": "868c61aa-fac2-4b63-b5e4-0f002968f3c9",
+            "component": "express",
+            "language": "javascript"
+        },
+        "metrics": {
+            "process_id": 22336,
+            "_sampling_priority_v1": 1
+        },
+        "start": 1672269972278912300,
+        "duration": 8986816,
+        "service": "esbuild-demo"
+    },
+    {
+        "trace_id": "27e4a27fd89293fd",
+        "span_id": "5df90b2becbf29d7",
+        "parent_id": "3536b2009571b60c",
+        "name": "redis.command",
+        "resource": "INCR",
+        "error": 0,
+        "meta": {
+            "service": "esbuild-demo",
+            "version": "1.0.0",
+            "runtime-id": "868c61aa-fac2-4b63-b5e4-0f002968f3c9",
+            "component": "redis",
+            "span.kind": "client",
+            "db.type": "redis",
+            "db.name": "0",
+            "redis.raw_command": "INCR my-counter",
+            "language": "javascript"
+        },
+        "metrics": {
+            "_dd.measured": 1,
+            "process_id": 22336,
+            "_sampling_priority_v1": 1
+        },
+        "start": 1672269972279348200,
+        "duration": 5639648,
+        "service": "esbuild-demo-redis",
+        "type": "redis"
+    }
+]

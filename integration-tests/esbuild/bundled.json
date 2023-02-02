@@ -1,0 +1,34 @@
+[
+    {
+        "trace_id": "31a19b3a4615792b",
+        "span_id": "31a19b3a4615792b",
+        "parent_id": "0000000000000000",
+        "name": "web.request",
+        "resource": "GET",
+        "error": 0,
+        "meta": {
+            "_dd.p.dm": "-0",
+            "service": "esbuild-demo",
+            "version": "1.0.0",
+            "runtime-id": "679c2aad-2242-4b7e-93f0-4441fd614e8a",
+            "component": "http",
+            "http.url": "http://localhost:3000/",
+            "http.method": "GET",
+            "span.kind": "server",
+            "http.useragent": "curl/7.85.0",
+            "http.status_code": "200",
+            "language": "javascript"
+        },
+        "metrics": {
+            "_dd.agent_psr": 1,
+            "_dd.top_level": 1,
+            "_dd.measured": 1,
+            "process_id": 22614,
+            "_sampling_priority_v1": 1
+        },
+        "start": 1672270046877003000,
+        "duration": 5023926,
+        "service": "esbuild-demo",
+        "type": "web"
+    }
+]

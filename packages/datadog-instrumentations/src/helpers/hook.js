@@ -3,8 +3,17 @@
 const path = require('path')
 const iitm = require('../../../dd-trace/src/iitm')
 const ritm = require('../../../dd-trace/src/ritm')
+const dcitm = require('../../../dd-trace/src/dcitm')
 
+/**
+ * This is called for every module that dd-trace supports instrumentation for.
+ * In practice, `modules` is always an array with a single entry.
+ * 
+ * @param {string[]} modules list of modules to hook into
+ * @param {Function} onrequire callback to be executed upon encountering module
+ */
 function Hook (modules, onrequire) {
+  console.log('hook.js Hook()', modules)
   if (!(this instanceof Hook)) return new Hook(modules, onrequire)
 
   this._patched = Object.create(null)
@@ -13,6 +22,7 @@ function Hook (modules, onrequire) {
     const parts = [moduleBaseDir, moduleName].filter(v => v)
     const filename = path.join(...parts)
 
+    console.log('IS PATCHED', filename, !!this._patched[filename])
     if (this._patched[filename]) return moduleExports
 
     this._patched[filename] = true
@@ -33,11 +43,13 @@ function Hook (modules, onrequire) {
       return safeHook(moduleExports, moduleName, moduleBaseDir)
     }
   })
+  this._dcitmHook = dcitm.prep(modules, {}, safeHook)
 }
 
 Hook.prototype.unhook = function () {
   this._ritmHook.unhook()
   this._iitmHook.unhook()
+  this._dcitmHook.unhook()
   this._patched = Object.create(null)
 }
 
