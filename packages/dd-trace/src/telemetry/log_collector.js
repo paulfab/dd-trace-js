@@ -62,7 +62,7 @@ const logCollector = {
   add (message, level, stack, tags) {
     if (!message) return
 
-    // NOTE: should errors have higher priority?
+    // NOTE: should errors have higher priority? and discard a
     if (logs.size >= maxEntries) {
       overflowedCount++
       return

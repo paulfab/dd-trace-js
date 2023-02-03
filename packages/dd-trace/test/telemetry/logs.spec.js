@@ -162,7 +162,22 @@ describe('telemetry logs', () => {
       expect(logCollectorAdd).to.be.calledOnceWith('message', 'WARN')
     })
 
-    it('should be called with ERROR level', () => {
+    it('should be called with ERROR level if SEND_TELEMETRY_MARK is present', () => {
+      const logCollectorAdd = sinon.stub()
+      const logs = proxyquire('../../src/telemetry/logs', {
+        '../log/channels': { errorChannel },
+        './log_collector': {
+          add: logCollectorAdd
+        }
+      })
+      logs.start(config, app, host)
+
+      onError(processMsg('message', SEND_TELEMETRY_MARK))
+
+      expect(logCollectorAdd).to.be.calledOnceWith('message', 'ERROR')
+    })
+
+    it('should not be called with ERROR level if SEND_TELEMETRY_MARK is not present', () => {
       const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel },
@@ -174,7 +189,7 @@ describe('telemetry logs', () => {
 
       onError(processMsg('message'))
 
-      expect(logCollectorAdd).to.be.calledOnceWith('message', 'ERROR')
+      expect(logCollectorAdd).to.not.be.calledOnce
     })
 
     it('should be called with ERROR level and stack_trace', () => {

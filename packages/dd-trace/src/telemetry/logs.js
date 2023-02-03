@@ -46,8 +46,9 @@ function onError (errObj) {
     message = err.message || err
     stackTrace = err.stack
   }
-
-  logCollector.add(message, 'ERROR', stackTrace)
+  if (stackTrace || sendTelemetry(errObj)) {
+    logCollector.add(message, 'ERROR', stackTrace)
+  }
 }
 
 function sendLogs () {
