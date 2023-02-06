@@ -85,10 +85,18 @@ function stop () {
   application = null
   host = null
 
-  debugChannel.unsubscribe(onDebug)
-  infoChannel.unsubscribe(onDebug)
-  warnChannel.unsubscribe(onWarn)
-  errorChannel.unsubscribe(onError)
+  if (debugChannel.hasSubscribers) {
+    debugChannel.unsubscribe(onDebug)
+  }
+  if (infoChannel.hasSubscribers) {
+    infoChannel.unsubscribe(onDebug)
+  }
+  if (warnChannel.hasSubscribers) {
+    warnChannel.unsubscribe(onWarn)
+  }
+  if (errorChannel.hasSubscribers) {
+    errorChannel.unsubscribe(onError)
+  }
 
   clearInterval(interval)
 }
