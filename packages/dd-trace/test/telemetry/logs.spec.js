@@ -4,21 +4,35 @@ const { SEND_TELEMETRY_MARK } = require('../../src/telemetry')
 
 describe('telemetry logs', () => {
   const errorChannel = {
+    get hasSubscribers () {
+      return this.subscribe.callCount > 0
+    },
     subscribe: sinon.stub(),
     unsubscribe: sinon.stub()
   }
   const warnChannel = {
+    get hasSubscribers () {
+      return this.subscribe.callCount > 0
+    },
     subscribe: sinon.stub(),
     unsubscribe: sinon.stub()
   }
   const infoChannel = {
+    get hasSubscribers () {
+      return this.subscribe.callCount > 0
+    },
     subscribe: sinon.stub(),
     unsubscribe: sinon.stub()
   }
   const debugChannel = {
+    get hasSubscribers () {
+      return this.subscribe.callCount > 0
+    },
     subscribe: sinon.stub(),
     unsubscribe: sinon.stub()
   }
+
+  errorChannel
 
   beforeEach(() => {
     errorChannel.subscribe.reset()
@@ -106,7 +120,23 @@ describe('telemetry logs', () => {
   })
 
   describe('stop', () => {
+    it('should unsubscribe configured listeners', () => {
+      const logs = proxyquire('../../src/telemetry/logs', {
+        '../log/channels': { errorChannel, warnChannel, infoChannel, debugChannel }
+      })
+      logs.start()
+
+      logs.stop()
+
+      expect(errorChannel.unsubscribe).to.have.been.calledOnce
+      expect(warnChannel.unsubscribe).to.have.been.calledOnce
+      expect(infoChannel.unsubscribe).to.not.have.been.called
+      expect(debugChannel.unsubscribe).to.not.have.been.called
+    })
+
     it('should unsubscribe all listeners', () => {
+      process.env.TELEMETRY_DEBUG_ENABLED = 'true'
+
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel, warnChannel, infoChannel, debugChannel }
       })
@@ -118,6 +148,8 @@ describe('telemetry logs', () => {
       expect(warnChannel.unsubscribe).to.have.been.calledOnce
       expect(infoChannel.unsubscribe).to.have.been.calledOnce
       expect(debugChannel.unsubscribe).to.have.been.calledOnce
+
+      delete process.env.TELEMETRY_DEBUG_ENABLED
     })
   })
 

@@ -1,6 +1,7 @@
 'use strict'
 
 const { calculateDDBasePath } = require('../util')
+const log = require('../log')
 
 const ddBasePath = calculateDDBasePath(__dirname)
 const EOL = '\n'
@@ -44,17 +45,17 @@ function hashCode (hashSource) {
   return hash
 }
 
-function createHash (log) {
-  if (!log) return 0
+function createHash (logEntry) {
+  if (!logEntry) return 0
 
   const prime = 31
   let result = 1
-  result = prime * result + ((!log.level) ? 0 : hashCode(log.level))
-  result = prime * result + ((!log.message) ? 0 : hashCode(log.message))
+  result = prime * result + ((!logEntry.level) ? 0 : hashCode(logEntry.level))
+  result = prime * result + ((!logEntry.message) ? 0 : hashCode(logEntry.message))
 
   // NOTE: tags are not used at the moment
   // result = prime * result + ((!log.tags) ? 0 : hashCode(log.tags))
-  result = prime * result + ((!log.stack) ? 0 : hashCode(log.stack))
+  result = prime * result + ((!logEntry.stack) ? 0 : hashCode(logEntry.stack))
   return result
 }
 
@@ -62,29 +63,31 @@ const logCollector = {
   add (message, level, stack, tags) {
     if (!message) return
 
-    // NOTE: should errors have higher priority? and discard a
+    // NOTE: should errors have higher priority? and discard log entries with lower priority?
     if (logs.size >= maxEntries) {
       overflowedCount++
       return
     }
 
-    const log = {
+    const logEntry = {
       message,
       level,
       tags
     }
 
-    if (stack) {
-      sanitize(log, stack)
+    try {
+      if (stack) {
+        sanitize(logEntry, stack)
+      }
+      const hash = createHash(logEntry)
+      if (!logs.has(hash)) {
+        logs.set(hash, logEntry)
+        return true
+      }
+    } catch (e) {
+      log.error(`Unable to add log to logCollector: ${e.message}`)
     }
-
-    const hash = createHash(log)
-    if (!logs.has(hash)) {
-      logs.set(hash, log)
-      return true
-    } else {
-      return false
-    }
+    return false
   },
 
   drain () {
