@@ -24,10 +24,23 @@ describe('telemetry log collector', () => {
       expect(logCollector.add('Warn 1', 'WARN')).to.be.true
     })
 
+    it('should store logs with same message but different stack', () => {
+      const ddFrame = `at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
+      expect(logCollector.add('Error 1', 'ERROR', `stack 1\n${ddFrame}`)).to.be.true
+      expect(logCollector.add('Error 1', 'ERROR', `stack 2\n${ddFrame}`)).to.be.true
+      expect(logCollector.add('Error 1', 'ERROR', `stack 3\n${ddFrame}`)).to.be.true
+    })
+
+    it('should store logs with same message, same stack but different level', () => {
+      expect(logCollector.add('Error 1', 'ERROR', 'stack 1')).to.be.true
+      expect(logCollector.add('Error 1', 'WARN', 'stack 1')).to.be.true
+      expect(logCollector.add('Error 1', 'DEBUG', 'stack 1')).to.be.true
+    })
+
     it('should include original message and dd frames', () => {
-      const thirdPartyFrame = `at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
+      const ddFrame = `at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
       const stack = new Error('Error 1')
-        .stack.replace(`Error 1${EOL}`, `Error 1${EOL}${thirdPartyFrame}${EOL}`)
+        .stack.replace(`Error 1${EOL}`, `Error 1${EOL}${ddFrame}${EOL}`)
       logCollector.add('Error 1', 'ERROR', stack)
 
       const log = logCollector.drain()[0]
@@ -75,7 +88,7 @@ describe('telemetry log collector', () => {
 
       const logs = logCollector.drain()
       expect(logs.length).to.be.equal(4)
-      expect(logs[3]).to.deep.eq({ message: 'Omitted 2 entries due to overflowing', level: 'ERROR' })
+      expect(logs[3]).to.deep.eq({ message: 'Omitted 2 entries due to overflowing', level: 'ERROR', tags: undefined })
     })
   })
 })

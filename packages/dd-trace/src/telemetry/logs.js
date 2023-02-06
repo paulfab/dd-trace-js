@@ -1,7 +1,6 @@
 'use strict'
 
 const { debugChannel, infoChannel, warnChannel, errorChannel } = require('../log/channels')
-
 const logCollector = require('./log_collector')
 const { sendData } = require('./send-data')
 const { isTrue } = require('../util')
