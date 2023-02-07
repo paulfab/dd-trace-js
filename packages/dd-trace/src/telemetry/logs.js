@@ -9,8 +9,8 @@ const isLogCollectionEnabled = process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLL
   ? isTrue(process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED)
   : true
 
-const debugEnabled = process.env.TELEMETRY_DEBUG_ENABLED
-  ? isTrue(process.env.TELEMETRY_DEBUG_ENABLED)
+const debugEnabled = process.env.DD_TELEMETRY_DEBUG_ENABLED
+  ? isTrue(process.env.DD_TELEMETRY_DEBUG_ENABLED)
   : false
 
 const SEND_TELEMETRY = Symbol('_dd.log.SEND_TELEMETRY')
