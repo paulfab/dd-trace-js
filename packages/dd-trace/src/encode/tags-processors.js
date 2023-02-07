@@ -41,8 +41,6 @@ function truncateToLength (value, maxLength) {
 function truncateSpan (span) {
   return fromEntries(Object.entries(span).map(([key, value]) => {
     switch (key) {
-      case 'resource':
-        return ['resource', truncateToLength(value, MAX_RESOURCE_NAME_LENGTH)]
       case 'meta':
         return ['meta', fromEntries(Object.entries(value).map(([metaKey, metaValue]) =>
           [truncateToLength(metaKey, MAX_META_KEY_LENGTH), truncateToLength(metaValue, MAX_META_VALUE_LENGTH)]
