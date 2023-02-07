@@ -55,7 +55,8 @@ describe('telemetry log collector', () => {
     })
 
     it('should not include original message if first frame is not a dd frame', () => {
-      const thirdPartyFrame = 'at callFn (/this/is/not/a/dd/frame/runnable.js:366:21)'
+      const thirdPartyFrame = `at callFn (/this/is/not/a/dd/frame/runnable.js:366:21)
+        at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
       const stack = new Error('Error 1')
         .stack.replace(`Error 1${EOL}`, `Error 1${EOL}${thirdPartyFrame}${EOL}`)
 
