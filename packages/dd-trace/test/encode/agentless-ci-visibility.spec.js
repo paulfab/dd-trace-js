@@ -11,7 +11,6 @@ const {
   MAX_METRIC_VALUE_LENGTH,
   MAX_NAME_LENGTH,
   MAX_SERVICE_LENGTH,
-  MAX_RESOURCE_NAME_LENGTH,
   MAX_TYPE_LENGTH,
   DEFAULT_SPAN_NAME,
   DEFAULT_SERVICE_NAME
@@ -122,7 +121,6 @@ describe('agentless-ci-visibility-encode', () => {
 
   it('should truncate name, service, and type when they are too long', () => {
     const tooLongString = new Array(500).fill('a').join('')
-    const resourceTooLongString = new Array(10000).fill('a').join('')
     const traceToTruncate = [{
       trace_id: id('1234abcd1234abcd'),
       span_id: id('1234abcd1234abcd'),

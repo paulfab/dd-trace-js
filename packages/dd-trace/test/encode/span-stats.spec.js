@@ -7,7 +7,6 @@ const codec = msgpack.createCodec()
 const {
   MAX_NAME_LENGTH,
   MAX_SERVICE_LENGTH,
-  MAX_RESOURCE_NAME_LENGTH,
   MAX_TYPE_LENGTH,
   DEFAULT_SPAN_NAME,
   DEFAULT_SERVICE_NAME
@@ -98,7 +97,6 @@ describe('span-stats-encode', () => {
 
   it('should truncate name, service, and type when they are too long', () => {
     const tooLongString = new Array(500).fill('a').join('')
-    const resourceTooLongString = new Array(10000).fill('a').join('')
     const statsToTruncate = {
       ...stats,
       Stats: [
