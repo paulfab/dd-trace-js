@@ -6,6 +6,12 @@ function sendData (config, application, host, reqType, payload = {}) {
     port,
     url
   } = config
+
+  const payloadClone = { ...payload };
+  delete payloadClone.serviceMapping;
+  delete payloadClone.logger;
+  delete payloadClone.tags;
+
   const options = {
     url,
     hostname,
@@ -24,7 +30,7 @@ function sendData (config, application, host, reqType, payload = {}) {
     tracer_time: Math.floor(Date.now() / 1000),
     runtime_id: config.tags['runtime-id'],
     seq_id: ++seqId,
-    payload,
+    payload: payloadClone,
     application,
     host
   })
