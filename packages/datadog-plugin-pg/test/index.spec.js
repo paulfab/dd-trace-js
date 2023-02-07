@@ -77,7 +77,7 @@ describe('Plugin', () => {
             })
           })
 
-          it.only('should send long queries to agent', done => {
+          it('should send long queries to agent', done => {
             agent.use(traces => {
               expect(traces[0][0]).to.have.property('resource', `SELECT '${'x'.repeat(5000)}'::text as message`)
 
