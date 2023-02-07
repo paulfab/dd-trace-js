@@ -74,8 +74,8 @@ describe('telemetry logs', () => {
       expect(warnChannel.subscribe).to.have.been.calledOnce
     })
 
-    it('should subscribe debug listeners when TELEMETRY_DEBUG_ENABLED = true', () => {
-      process.env.TELEMETRY_DEBUG_ENABLED = 'true'
+    it('should subscribe debug listeners when DD_TELEMETRY_DEBUG_ENABLED = true', () => {
+      process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
 
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel, warnChannel, infoChannel, debugChannel }
@@ -87,7 +87,7 @@ describe('telemetry logs', () => {
       expect(infoChannel.subscribe).to.have.been.calledOnce
       expect(debugChannel.subscribe).to.have.been.calledOnce
 
-      delete process.env.TELEMETRY_DEBUG_ENABLED
+      delete process.env.DD_TELEMETRY_DEBUG_ENABLED
     })
 
     it('should call sendData periodically', () => {
@@ -134,7 +134,7 @@ describe('telemetry logs', () => {
     })
 
     it('should unsubscribe all listeners', () => {
-      process.env.TELEMETRY_DEBUG_ENABLED = 'true'
+      process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
 
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel, warnChannel, infoChannel, debugChannel }
@@ -148,7 +148,7 @@ describe('telemetry logs', () => {
       expect(infoChannel.unsubscribe).to.have.been.calledOnce
       expect(debugChannel.unsubscribe).to.have.been.calledOnce
 
-      delete process.env.TELEMETRY_DEBUG_ENABLED
+      delete process.env.DD_TELEMETRY_DEBUG_ENABLED
     })
   })
 
@@ -186,7 +186,7 @@ describe('telemetry logs', () => {
     }
 
     it('should be called with DEBUG level and error even if SEND_TELEMETRY_MARK is not present', () => {
-      process.env.TELEMETRY_DEBUG_ENABLED = 'true'
+      process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
 
       const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
@@ -203,11 +203,11 @@ describe('telemetry logs', () => {
 
       expect(logCollectorAdd).to.be.calledOnceWith('test', 'DEBUG', stack)
 
-      delete process.env.TELEMETRY_DEBUG_ENABLED
+      delete process.env.DD_TELEMETRY_DEBUG_ENABLED
     })
 
     it('should be not called with DEBUG level if SEND_TELEMETRY_MARK is not present', () => {
-      process.env.TELEMETRY_DEBUG_ENABLED = 'true'
+      process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
 
       const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
@@ -222,7 +222,7 @@ describe('telemetry logs', () => {
 
       expect(logCollectorAdd).to.not.be.called
 
-      delete process.env.TELEMETRY_DEBUG_ENABLED
+      delete process.env.DD_TELEMETRY_DEBUG_ENABLED
     })
 
     it('should be called with WARN level if SEND_TELEMETRY_MARK is present', () => {

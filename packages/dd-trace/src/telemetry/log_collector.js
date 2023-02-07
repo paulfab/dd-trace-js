@@ -13,8 +13,8 @@ const logs = new Map()
 let maxEntries = 10000
 let overflowedCount = 0
 
-function sanitize (log, stack) {
-  if (!stack) return
+function sanitize (logEntry, stack) {
+  if (!stack) return logEntry
 
   let stackLines = stack.split(EOL)
 
@@ -29,11 +29,13 @@ function sanitize (log, stack) {
   const isDDCode = firstIndex > -1 ? stackLines[firstIndex].includes(ddBasePath) : false
   stackLines = stackLines.filter((line, index) => (isDDCode && index < firstIndex) || line.includes(ddBasePath))
 
-  log.stack_trace = stackLines.join(EOL)
+  logEntry.stack_trace = stackLines.join(EOL)
 
   if (!isDDCode) {
-    log.message = 'omitted'
+    logEntry.message = 'omitted'
   }
+
+  return logEntry
 }
 
 function hashCode (hashSource) {
@@ -82,6 +84,11 @@ const logCollector = {
     try {
       if (stack) {
         sanitize(logEntry, stack)
+
+        // discard logEntry if after sanitize stack is empty
+        if (logEntry.stack_trace === '') {
+          return false
+        }
       }
 
       const hash = createHash(logEntry)

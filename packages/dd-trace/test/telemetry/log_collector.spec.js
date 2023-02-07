@@ -32,9 +32,10 @@ describe('telemetry log collector', () => {
     })
 
     it('should store logs with same message, same stack but different level', () => {
-      expect(logCollector.add('Error 1', 'ERROR', 'stack 1')).to.be.true
-      expect(logCollector.add('Error 1', 'WARN', 'stack 1')).to.be.true
-      expect(logCollector.add('Error 1', 'DEBUG', 'stack 1')).to.be.true
+      const ddFrame = `at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
+      expect(logCollector.add('Error 1', 'ERROR', `stack 1\n${ddFrame}`)).to.be.true
+      expect(logCollector.add('Error 1', 'WARN', `stack 1\n${ddFrame}`)).to.be.true
+      expect(logCollector.add('Error 1', 'DEBUG', `stack 1\n${ddFrame}`)).to.be.true
     })
 
     it('should include original message and dd frames', () => {
