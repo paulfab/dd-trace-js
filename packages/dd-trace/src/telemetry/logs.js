@@ -13,11 +13,16 @@ const debugEnabled = process.env.TELEMETRY_DEBUG_ENABLED
   ? isTrue(process.env.TELEMETRY_DEBUG_ENABLED)
   : false
 
+const SEND_TELEMETRY = Symbol('_dd.log.SEND_TELEMETRY')
+const SEND_TELEMETRY_MARK = {
+  [SEND_TELEMETRY]: true
+}
+
 let config, application, host, interval
 
-function sendTelemetry (messageObj) {
+function isSendTelemetryAvailable (messageObj) {
   return messageObj.options &&
-    messageObj.options.SEND_TELEMETRY
+    messageObj.options[SEND_TELEMETRY]
 }
 
 function addLog (messageObj, level) {
@@ -33,7 +38,7 @@ function addLog (messageObj, level) {
     logMessage = message.message || message
     stackTrace = message.stack
   }
-  if (stackTrace || sendTelemetry(messageObj)) {
+  if (stackTrace || isSendTelemetryAvailable(messageObj)) {
     logCollector.add(logMessage, level, stackTrace)
   }
 }
@@ -100,4 +105,4 @@ function stop () {
   clearInterval(interval)
 }
 
-module.exports = { start, stop }
+module.exports = { start, stop, SEND_TELEMETRY_MARK }

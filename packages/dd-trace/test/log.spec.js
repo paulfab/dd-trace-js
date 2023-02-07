@@ -2,7 +2,7 @@
 
 const { expect } = require('chai')
 const { storage } = require('../../datadog-core')
-const { SEND_TELEMETRY_MARK } = require('../src/telemetry')
+const { SEND_TELEMETRY_MARK } = require('../src/telemetry/logs')
 
 /* eslint-disable no-console */
 
@@ -280,10 +280,11 @@ describe('log', () => {
     })
   })
 
-  describe('telemetry', () => {
+  describe('with', () => {
     it('should return a log with SEND_TELEMETRY_MARK enabled', () => {
       const debugChannelPublish = sinon.stub()
       const warnChannelPublish = sinon.stub()
+      const errorChannelPublish = sinon.stub()
 
       const log = proxyquire('../src/log', {
         './channels': {
@@ -294,6 +295,10 @@ describe('log', () => {
           warnChannel: {
             hasSubscribers: true,
             publish: warnChannelPublish
+          },
+          errorChannel: {
+            hasSubscribers: true,
+            publish: errorChannelPublish
           }
         }
       })
@@ -306,6 +311,10 @@ describe('log', () => {
 
       logWithTelemetry.warn('warn')
       expect(warnChannelPublish).to.have.been.calledWith({ message: 'warn', options: SEND_TELEMETRY_MARK })
+
+      logWithTelemetry.deprecate('code', 'message')
+      logWithTelemetry.deprecate('code', 'message')
+      expect(errorChannelPublish).to.have.been.calledOnceWith({ message: 'message', options: undefined })
     })
   })
 })

@@ -1,6 +1,5 @@
 const { expect } = require('chai')
 const proxyquire = require('proxyquire')
-const { SEND_TELEMETRY_MARK } = require('../../src/telemetry')
 
 describe('telemetry logs', () => {
   const errorChannel = {
@@ -236,7 +235,7 @@ describe('telemetry logs', () => {
       })
       logs.start(config, app, host)
 
-      onWarn(processMsg('message', SEND_TELEMETRY_MARK))
+      onWarn(processMsg('message', logs.SEND_TELEMETRY_MARK))
 
       expect(logCollectorAdd).to.be.calledOnceWith('message', 'WARN')
     })
@@ -251,7 +250,7 @@ describe('telemetry logs', () => {
       })
       logs.start(config, app, host)
 
-      onError(processMsg('message', SEND_TELEMETRY_MARK))
+      onError(processMsg('message', logs.SEND_TELEMETRY_MARK))
 
       expect(logCollectorAdd).to.be.calledOnceWith('message', 'ERROR')
     })

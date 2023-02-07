@@ -1,6 +1,7 @@
 'use strict'
 
 const Capabilities = require('../../../src/appsec/remote_config/capabilities')
+const { SEND_TELEMETRY_MARK } = require('../../../src/telemetry/logs')
 
 const noop = () => {}
 
@@ -226,7 +227,8 @@ describe('RemoteConfigManager', () => {
         expect(request).to.have.been.calledOnceWith(payload, rc.requestOptions)
         expect(rc.parseConfig).to.have.been.calledOnceWithExactly({ a: 'b' })
         expect(log.error).to.have.been
-          .calledOnceWithExactly('Could not parse remote config response: Error: Unable to parse config')
+          .calledOnceWithExactly('Could not parse remote config response: Error: Unable to parse config',
+            SEND_TELEMETRY_MARK)
         expect(rc.state.client.state.has_error).to.be.true
         expect(rc.state.client.state.error).to.equal('Error: Unable to parse config')
 

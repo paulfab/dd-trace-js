@@ -89,6 +89,9 @@ const log = {
       },
       error: (err, options) => {
         return this.error(err, { ...defaultOptions, ...options })
+      },
+      deprecate: (code, message) => {
+        return this.deprecate(code, message)
       }
     }
   }

@@ -1,6 +1,7 @@
 'use strict'
 
 const proxyquire = require('proxyquire')
+const { SEND_TELEMETRY_MARK } = require('../../../src/telemetry/logs')
 
 describe('track_event', () => {
   let log
@@ -42,8 +43,10 @@ describe('track_event', () => {
       trackUserLoginSuccessEvent(tracer, {}, { key: 'value' })
 
       expect(log.warn).to.have.been.calledTwice
-      expect(log.warn.firstCall).to.have.been.calledWithExactly('Invalid user provided to trackUserLoginSuccessEvent')
-      expect(log.warn.secondCall).to.have.been.calledWithExactly('Invalid user provided to trackUserLoginSuccessEvent')
+      expect(log.warn.firstCall).to.have.been.calledWithExactly('Invalid user provided to trackUserLoginSuccessEvent',
+        SEND_TELEMETRY_MARK)
+      expect(log.warn.secondCall).to.have.been.calledWithExactly('Invalid user provided to trackUserLoginSuccessEvent',
+        SEND_TELEMETRY_MARK)
       expect(tracer.setUser).to.not.have.been.called
       expect(rootSpan.addTags).to.not.have.been.called
     })
@@ -53,7 +56,8 @@ describe('track_event', () => {
 
       trackUserLoginSuccessEvent(tracer, { id: 'user_id' }, { key: 'value' })
 
-      expect(log.warn).to.have.been.calledOnceWithExactly('Root span not available in trackUserLoginSuccessEvent')
+      expect(log.warn).to.have.been.calledOnceWithExactly('Root span not available in trackUserLoginSuccessEvent',
+        SEND_TELEMETRY_MARK)
       expect(tracer.setUser).to.not.have.been.called
     })
 
@@ -97,9 +101,11 @@ describe('track_event', () => {
       trackUserLoginFailureEvent(tracer, [], false)
 
       expect(log.warn).to.have.been.calledTwice
-      expect(log.warn.firstCall).to.have.been.calledWithExactly('Invalid userId provided to trackUserLoginFailureEvent')
+      expect(log.warn.firstCall).to.have.been.calledWithExactly('Invalid userId provided to trackUserLoginFailureEvent',
+        SEND_TELEMETRY_MARK)
       expect(log.warn.secondCall)
-        .to.have.been.calledWithExactly('Invalid userId provided to trackUserLoginFailureEvent')
+        .to.have.been.calledWithExactly('Invalid userId provided to trackUserLoginFailureEvent',
+          SEND_TELEMETRY_MARK)
       expect(tracer.setUser).to.not.have.been.called
       expect(rootSpan.addTags).to.not.have.been.called
     })
@@ -109,7 +115,8 @@ describe('track_event', () => {
 
       trackUserLoginFailureEvent(tracer, 'user_id', false)
 
-      expect(log.warn).to.have.been.calledOnceWithExactly('Root span not available in trackUserLoginFailureEvent')
+      expect(log.warn).to.have.been.calledOnceWithExactly('Root span not available in trackUserLoginFailureEvent',
+        SEND_TELEMETRY_MARK)
       expect(tracer.setUser).to.not.have.been.called
     })
 
@@ -169,8 +176,10 @@ describe('track_event', () => {
       trackCustomEvent(tracer, { name: 'name' })
 
       expect(log.warn).to.have.been.calledTwice
-      expect(log.warn.firstCall).to.have.been.calledWithExactly('Invalid eventName provided to trackCustomEvent')
-      expect(log.warn.secondCall).to.have.been.calledWithExactly('Invalid eventName provided to trackCustomEvent')
+      expect(log.warn.firstCall).to.have.been.calledWithExactly('Invalid eventName provided to trackCustomEvent',
+        SEND_TELEMETRY_MARK)
+      expect(log.warn.secondCall).to.have.been.calledWithExactly('Invalid eventName provided to trackCustomEvent',
+        SEND_TELEMETRY_MARK)
       expect(tracer.setUser).to.not.have.been.called
       expect(rootSpan.addTags).to.not.have.been.called
     })
@@ -180,7 +189,8 @@ describe('track_event', () => {
 
       trackCustomEvent(tracer, 'custom_event')
 
-      expect(log.warn).to.have.been.calledOnceWithExactly('Root span not available in trackCustomEvent')
+      expect(log.warn).to.have.been.calledOnceWithExactly('Root span not available in trackCustomEvent',
+        SEND_TELEMETRY_MARK)
       expect(tracer.setUser).to.not.have.been.called
     })
 

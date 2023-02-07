@@ -6,7 +6,7 @@ const Scheduler = require('./scheduler')
 const tracerVersion = require('../../../../../package.json').version
 const request = require('../../exporters/common/request')
 const log = require('../../log')
-const { SEND_TELEMETRY_MARK } = require('../../telemetry')
+const { SEND_TELEMETRY_MARK } = require('../../telemetry/logs')
 
 const clientId = uuid()
 
