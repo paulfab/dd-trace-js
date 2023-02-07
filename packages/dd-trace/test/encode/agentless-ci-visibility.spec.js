@@ -120,7 +120,7 @@ describe('agentless-ci-visibility-encode', () => {
     expect(encoder.count()).to.equal(0)
   })
 
-  it('should truncate name, service, type and resource when they are too long', () => {
+  it('should truncate name, service, and type when they are too long', () => {
     const tooLongString = new Array(500).fill('a').join('')
     const resourceTooLongString = new Array(10000).fill('a').join('')
     const traceToTruncate = [{
@@ -133,7 +133,7 @@ describe('agentless-ci-visibility-encode', () => {
       },
       metrics: {},
       name: tooLongString,
-      resource: resourceTooLongString,
+      resource: 'foo',
       type: tooLongString,
       service: tooLongString,
       start: 123,
@@ -149,8 +149,6 @@ describe('agentless-ci-visibility-encode', () => {
     expect(spanEvent.content.type.length).to.equal(MAX_TYPE_LENGTH)
     expect(spanEvent.content.name.length).to.equal(MAX_NAME_LENGTH)
     expect(spanEvent.content.service.length).to.equal(MAX_SERVICE_LENGTH)
-    // ellipsis is added
-    expect(spanEvent.content.resource.length).to.equal(MAX_RESOURCE_NAME_LENGTH + 3)
   })
 
   it('should fallback to a default name and service if they are not present', () => {

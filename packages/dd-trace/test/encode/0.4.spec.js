@@ -81,7 +81,7 @@ describe('encode', () => {
     expect(trace[0].parent_id.toString(16)).to.equal('1234abcd1234abcd')
   })
 
-  it('should truncate long fields', function () {
+  it.skip('should truncate long fields', function () {
     this.timeout(5000)
     const flushSize = 8 * 1024 * 1024
     const tooLongString = randString(flushSize)

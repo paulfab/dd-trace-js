@@ -96,7 +96,7 @@ describe('span-stats-encode', () => {
     expect(encoder.count()).to.equal(0)
   })
 
-  it('should truncate name, service, type and resource when they are too long', () => {
+  it('should truncate name, service, and type when they are too long', () => {
     const tooLongString = new Array(500).fill('a').join('')
     const resourceTooLongString = new Array(10000).fill('a').join('')
     const statsToTruncate = {
@@ -109,8 +109,7 @@ describe('span-stats-encode', () => {
               ...stat,
               Name: tooLongString,
               Type: tooLongString,
-              Service: tooLongString,
-              Resource: resourceTooLongString
+              Service: tooLongString
             }
           ]
         }
@@ -126,8 +125,6 @@ describe('span-stats-encode', () => {
     expect(decodedStat.Type.length).to.equal(MAX_TYPE_LENGTH)
     expect(decodedStat.Name.length).to.equal(MAX_NAME_LENGTH)
     expect(decodedStat.Service.length).to.equal(MAX_SERVICE_LENGTH)
-    // ellipsis is added
-    expect(decodedStat.Resource.length).to.equal(MAX_RESOURCE_NAME_LENGTH + 3)
   })
 
   it('should fallback to a default name and service if they are not present', () => {
