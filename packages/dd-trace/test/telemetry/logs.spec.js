@@ -158,6 +158,13 @@ describe('telemetry logs', () => {
     const app = {}
     const host = {}
 
+    let onDebug
+    const debugChannel = {
+      subscribe: function (onMessage) {
+        onDebug = onMessage
+      }
+    }
+
     let onWarn
     const warnChannel = {
       subscribe: function (onMessage) {
@@ -179,7 +186,47 @@ describe('telemetry logs', () => {
       }
     }
 
-    it('should be called with WARN level', () => {
+    it('should be called with DEBUG level and error even if SEND_TELEMETRY_MARK is not present', () => {
+      process.env.TELEMETRY_DEBUG_ENABLED = 'true'
+
+      const logCollectorAdd = sinon.stub()
+      const logs = proxyquire('../../src/telemetry/logs', {
+        '../log/channels': { debugChannel },
+        './log_collector': {
+          add: logCollectorAdd
+        }
+      })
+      logs.start(config, app, host)
+
+      const error = new Error('test')
+      const stack = error.stack
+      onDebug(processMsg(error))
+
+      expect(logCollectorAdd).to.be.calledOnceWith('test', 'DEBUG', stack)
+
+      delete process.env.TELEMETRY_DEBUG_ENABLED
+    })
+
+    it('should be not called with DEBUG level if SEND_TELEMETRY_MARK is not present', () => {
+      process.env.TELEMETRY_DEBUG_ENABLED = 'true'
+
+      const logCollectorAdd = sinon.stub()
+      const logs = proxyquire('../../src/telemetry/logs', {
+        '../log/channels': { debugChannel },
+        './log_collector': {
+          add: logCollectorAdd
+        }
+      })
+      logs.start(config, app, host)
+
+      onDebug(processMsg('debug'))
+
+      expect(logCollectorAdd).to.not.be.called
+
+      delete process.env.TELEMETRY_DEBUG_ENABLED
+    })
+
+    it('should be called with WARN level if SEND_TELEMETRY_MARK is present', () => {
       const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { warnChannel },

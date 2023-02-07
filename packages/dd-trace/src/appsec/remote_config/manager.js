@@ -6,6 +6,7 @@ const Scheduler = require('./scheduler')
 const tracerVersion = require('../../../../../package.json').version
 const request = require('../../exporters/common/request')
 const log = require('../../log')
+const { SEND_TELEMETRY_MARK } = require('../../telemetry')
 
 const clientId = uuid()
 
@@ -117,7 +118,7 @@ class RemoteConfigManager extends EventEmitter {
         try {
           this.parseConfig(JSON.parse(data))
         } catch (err) {
-          log.error(`Could not parse remote config response: ${err}`)
+          log.error(`Could not parse remote config response: ${err}`, SEND_TELEMETRY_MARK)
 
           this.state.client.state.has_error = true
           this.state.client.state.error = err.toString()

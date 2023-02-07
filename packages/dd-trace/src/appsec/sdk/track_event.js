@@ -1,6 +1,7 @@
 'use strict'
 
-const log = require('../../log')
+const { SEND_TELEMETRY_MARK } = require('../../telemetry')
+const log = require('../../log').with(SEND_TELEMETRY_MARK)
 const { getRootSpan } = require('./utils')
 const { MANUAL_KEEP } = require('../../../../../ext/tags')
 

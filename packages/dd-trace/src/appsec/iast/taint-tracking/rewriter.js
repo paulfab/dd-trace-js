@@ -5,6 +5,7 @@ const shimmer = require('../../../../../datadog-shimmer')
 const log = require('../../../log')
 const { isPrivateModule, isNotLibraryFile } = require('./filter')
 const { csiMethods } = require('./csi-methods')
+const { SEND_TELEMETRY_MARK } = require('../../../telemetry')
 
 let rewriter
 let getPrepareStackTrace
@@ -16,7 +17,7 @@ function getRewriter () {
       getPrepareStackTrace = iastRewriter.getPrepareStackTrace
       rewriter = new Rewriter({ csiMethods })
     } catch (e) {
-      log.warn(`Unable to initialize TaintTracking Rewriter: ${e.message}`)
+      log.error(`Unable to initialize TaintTracking Rewriter: ${e}`, SEND_TELEMETRY_MARK)
     }
   }
   return rewriter
@@ -43,7 +44,7 @@ function getCompileMethodFn (compileMethod) {
         content = rewriter.rewrite(content, filename)
       }
     } catch (e) {
-      log.debug(e)
+      log.error(e)
     }
     return compileMethod.apply(this, [content, filename])
   }

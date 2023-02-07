@@ -32,7 +32,7 @@ function getFilteredCsiFn (cb, filter) {
         return cb(transactionId, res, target, ...rest)
       }
     } catch (e) {
-      log.debug(e)
+      log.error(e)
     }
     return res
   }
@@ -80,7 +80,7 @@ const csiMethodsOverrides = {
         return TaintedUtils.concat(transactionId, res, op1, op2)
       }
     } catch (e) {
-      log.debug(e)
+      log.error(e)
     }
     return res
   },

@@ -20,34 +20,34 @@ function sendTelemetry (messageObj) {
     messageObj.options.SEND_TELEMETRY
 }
 
-function onDebug (messageObj) {
-  if (sendTelemetry(messageObj)) {
-    logCollector.add(messageObj.message, 'DEBUG')
+function addLog (messageObj, level) {
+  const message = messageObj.message
+
+  let logMessage
+  let stackTrace
+  if (typeof message !== 'object' || !message) {
+    logMessage = String(message)
+  } else if (!message.stack) {
+    logMessage = String(message.message || message)
+  } else {
+    logMessage = message.message || message
+    stackTrace = message.stack
   }
+  if (stackTrace || sendTelemetry(messageObj)) {
+    logCollector.add(logMessage, level, stackTrace)
+  }
+}
+
+function onDebug (messageObj) {
+  addLog(messageObj, 'DEBUG')
 }
 
 function onWarn (messageObj) {
-  if (sendTelemetry(messageObj)) {
-    logCollector.add(messageObj.message, 'WARN')
-  }
+  addLog(messageObj, 'WARN')
 }
 
-function onError (errObj) {
-  const err = errObj.message
-
-  let message
-  let stackTrace
-  if (typeof err !== 'object' || !err) {
-    message = String(err)
-  } else if (!err.stack) {
-    message = String(err.message || err)
-  } else {
-    message = err.message || err
-    stackTrace = err.stack
-  }
-  if (stackTrace || sendTelemetry(errObj)) {
-    logCollector.add(message, 'ERROR', stackTrace)
-  }
+function onError (messageObj) {
+  addLog(messageObj, 'ERROR')
 }
 
 function sendLogs () {
