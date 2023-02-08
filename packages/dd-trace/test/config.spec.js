@@ -672,7 +672,7 @@ describe('Config', () => {
 
     const config = new Config()
 
-    expect(config.telemetryEnabled).to.be.false
+    expect(config.telemetry.enabled).to.be.false
   })
 
   it('should not set DD_REMOTE_CONFIGURATION_ENABLED if AWS_LAMBDA_FUNCTION_NAME is present', () => {

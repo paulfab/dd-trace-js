@@ -31,9 +31,17 @@ describe('telemetry logs', () => {
     unsubscribe: sinon.stub()
   }
 
-  errorChannel
+  let defaultConfig
 
   beforeEach(() => {
+    defaultConfig = {
+      telemetry: {
+        enabled: true,
+        logCollection: true,
+        debug: false
+      }
+    }
+
     errorChannel.subscribe.reset()
     errorChannel.unsubscribe.reset()
     warnChannel.subscribe.reset()
@@ -49,45 +57,40 @@ describe('telemetry logs', () => {
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel }
       })
-      logs.start()
+      logs.start(defaultConfig)
       expect(errorChannel.subscribe).to.have.been.calledOnce
     })
 
     it('should be disabled and not subscribe if DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED = false', () => {
-      process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED = 'false'
-
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel }
       })
-      logs.start()
-      expect(errorChannel.subscribe).to.not.have.been.calledOnce
 
-      delete process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED
+      defaultConfig.telemetry.logCollection = false
+      logs.start(defaultConfig)
+      expect(errorChannel.subscribe).to.not.have.been.calledOnce
     })
 
     it('should subscribe default listeners', () => {
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel, warnChannel }
       })
-      logs.start()
+      logs.start(defaultConfig)
       expect(errorChannel.subscribe).to.have.been.calledOnce
       expect(warnChannel.subscribe).to.have.been.calledOnce
     })
 
     it('should subscribe debug listeners when DD_TELEMETRY_DEBUG_ENABLED = true', () => {
-      process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
-
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel, warnChannel, infoChannel, debugChannel }
       })
-      logs.start()
+      defaultConfig.telemetry.debug = true
+      logs.start(defaultConfig)
 
       expect(errorChannel.subscribe).to.have.been.calledOnce
       expect(warnChannel.subscribe).to.have.been.calledOnce
       expect(infoChannel.subscribe).to.have.been.calledOnce
       expect(debugChannel.subscribe).to.have.been.calledOnce
-
-      delete process.env.DD_TELEMETRY_DEBUG_ENABLED
     })
 
     it('should call sendData periodically', () => {
@@ -109,7 +112,7 @@ describe('telemetry logs', () => {
             drain: () => { return { message: 'Error 1', level: 'ERROR' } }
           }
         })
-        logs.start({}, {}, {}, 60000)
+        logs.start(defaultConfig, {}, {}, 60000)
 
         global.setInterval = originalSetInterval
       }).then(() => {
@@ -123,7 +126,7 @@ describe('telemetry logs', () => {
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel, warnChannel, infoChannel, debugChannel }
       })
-      logs.start()
+      logs.start(defaultConfig)
 
       logs.stop()
 
@@ -134,12 +137,11 @@ describe('telemetry logs', () => {
     })
 
     it('should unsubscribe all listeners', () => {
-      process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
-
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { errorChannel, warnChannel, infoChannel, debugChannel }
       })
-      logs.start()
+      defaultConfig.telemetry.debug = true
+      logs.start(defaultConfig)
 
       logs.stop()
 
@@ -147,13 +149,10 @@ describe('telemetry logs', () => {
       expect(warnChannel.unsubscribe).to.have.been.calledOnce
       expect(infoChannel.unsubscribe).to.have.been.calledOnce
       expect(debugChannel.unsubscribe).to.have.been.calledOnce
-
-      delete process.env.DD_TELEMETRY_DEBUG_ENABLED
     })
   })
 
   describe('sendData', () => {
-    const config = {}
     const app = {}
     const host = {}
 
@@ -186,8 +185,6 @@ describe('telemetry logs', () => {
     }
 
     it('should be called with DEBUG level and error even if SEND_TELEMETRY_MARK is not present', () => {
-      process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
-
       const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { debugChannel },
@@ -195,20 +192,17 @@ describe('telemetry logs', () => {
           add: logCollectorAdd
         }
       })
-      logs.start(config, app, host)
+      defaultConfig.telemetry.debug = true
+      logs.start(defaultConfig, app, host)
 
       const error = new Error('test')
       const stack = error.stack
       onDebug(processMsg(error))
 
       expect(logCollectorAdd).to.be.calledOnceWith('test', 'DEBUG', stack)
-
-      delete process.env.DD_TELEMETRY_DEBUG_ENABLED
     })
 
     it('should be not called with DEBUG level if SEND_TELEMETRY_MARK is not present', () => {
-      process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
-
       const logCollectorAdd = sinon.stub()
       const logs = proxyquire('../../src/telemetry/logs', {
         '../log/channels': { debugChannel },
@@ -216,13 +210,12 @@ describe('telemetry logs', () => {
           add: logCollectorAdd
         }
       })
-      logs.start(config, app, host)
+      defaultConfig.telemetry.debug = true
+      logs.start(defaultConfig, app, host)
 
       onDebug(processMsg('debug'))
 
       expect(logCollectorAdd).to.not.be.called
-
-      delete process.env.DD_TELEMETRY_DEBUG_ENABLED
     })
 
     it('should be called with WARN level if SEND_TELEMETRY_MARK is present', () => {
@@ -233,7 +226,7 @@ describe('telemetry logs', () => {
           add: logCollectorAdd
         }
       })
-      logs.start(config, app, host)
+      logs.start(defaultConfig, app, host)
 
       onWarn(processMsg('message', logs.SEND_TELEMETRY_MARK))
 
@@ -248,7 +241,7 @@ describe('telemetry logs', () => {
           add: logCollectorAdd
         }
       })
-      logs.start(config, app, host)
+      logs.start(defaultConfig, app, host)
 
       onError(processMsg('message', logs.SEND_TELEMETRY_MARK))
 
@@ -263,7 +256,7 @@ describe('telemetry logs', () => {
           add: logCollectorAdd
         }
       })
-      logs.start(config, app, host)
+      logs.start(defaultConfig, app, host)
 
       onError(processMsg('message'))
 
@@ -278,7 +271,7 @@ describe('telemetry logs', () => {
           add: logCollectorAdd
         }
       })
-      logs.start(config, app, host)
+      logs.start(defaultConfig, app, host)
 
       const error = new Error('message')
       const stack = error.stack

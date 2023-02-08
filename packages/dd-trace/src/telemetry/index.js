@@ -105,7 +105,7 @@ function createHostObject () {
 }
 
 function start (aConfig, thePluginManager) {
-  if (!aConfig.telemetryEnabled) {
+  if (!aConfig.telemetry.enabled) {
     return
   }
   config = aConfig
@@ -132,7 +132,7 @@ function stop () {
 }
 
 function updateIntegrations () {
-  if (!config || !config.telemetryEnabled) {
+  if (!config || !config.telemetry.enabled) {
     return
   }
   const integrations = getIntegrations()

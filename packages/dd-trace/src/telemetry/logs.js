@@ -3,15 +3,6 @@
 const { debugChannel, infoChannel, warnChannel, errorChannel } = require('../log/channels')
 const logCollector = require('./log_collector')
 const { sendData } = require('./send-data')
-const { isTrue } = require('../util')
-
-const isLogCollectionEnabled = process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED
-  ? isTrue(process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED)
-  : true
-
-const debugEnabled = process.env.DD_TELEMETRY_DEBUG_ENABLED
-  ? isTrue(process.env.DD_TELEMETRY_DEBUG_ENABLED)
-  : false
 
 const SEND_TELEMETRY = Symbol('_dd.log.SEND_TELEMETRY')
 const SEND_TELEMETRY_MARK = {
@@ -26,6 +17,8 @@ function isSendTelemetryAvailable (messageObj) {
 }
 
 function addLog (messageObj, level) {
+  if (!messageObj) return
+
   const message = messageObj.message
 
   let logMessage
@@ -63,13 +56,13 @@ function sendLogs () {
 }
 
 function start (aConfig, appplicationObject, hostObject, heartbeatInterval) {
-  if (!isLogCollectionEnabled) return
+  if (!aConfig.telemetry.logCollection) return
 
   config = aConfig
   application = appplicationObject
   host = hostObject
 
-  if (debugEnabled) {
+  if (config.telemetry.debug) {
     debugChannel.subscribe(onDebug)
     infoChannel.subscribe(onDebug)
   }
@@ -83,7 +76,7 @@ function start (aConfig, appplicationObject, hostObject, heartbeatInterval) {
 }
 
 function stop () {
-  if (!isLogCollectionEnabled) return
+  if (!config || !config.telemetry || !config.telemetry.logCollection) return
 
   config = null
   application = null

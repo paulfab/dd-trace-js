@@ -80,8 +80,8 @@ const logCollector = {
       return
     }
 
-    const logEntry = newLogEntry(message, level, tags)
     try {
+      const logEntry = newLogEntry(message, level, tags)
       if (stack) {
         sanitize(logEntry, stack)
 
