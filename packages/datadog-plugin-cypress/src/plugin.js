@@ -7,7 +7,15 @@ const {
   getTestParentSpan,
   getCodeOwnersFileEntries,
   getCodeOwnersForFilename,
-  getTestCommonTags
+  getTestCommonTags,
+  getTestSessionCommonTags,
+  getTestModuleCommonTags,
+  getTestSuiteCommonTags,
+  TEST_SUITE_ID,
+  TEST_MODULE_ID,
+  TEST_SESSION_ID,
+  TEST_COMMAND,
+  TEST_BUNDLE
 } = require('../../dd-trace/src/plugins/util/test')
 
 const { ORIGIN_KEY, COMPONENT } = require('../../dd-trace/src/constants')
@@ -37,14 +45,88 @@ module.exports = (on, config) => {
   const codeOwnersEntries = getCodeOwnersFileEntries()
 
   let activeSpan = null
+  let testSessionSpan = null
+  let testModuleSpan = null
+  let testSuiteSpan = null
+  let command = null
+  let frameworkVersion
+
+  on('before:run', () => {
+    const childOf = getTestParentSpan(tracer)
+
+    // todo: update values
+    command = 'cypress'
+    frameworkVersion = '1.0.0'
+
+    const testSessionSpanMetadata = getTestSessionCommonTags(command, frameworkVersion)
+    const testModuleSpanMetadata = getTestModuleCommonTags(command, frameworkVersion)
+
+    testSessionSpan = tracer.startSpan('cypress.test_session', {
+      childOf,
+      tags: {
+        [COMPONENT]: 'cypress',
+        ...testEnvironmentMetadata,
+        ...testSessionSpanMetadata
+      }
+    })
+    testModuleSpan = tracer.startSpan('cypress.test_module', {
+      childOf: testSessionSpan,
+      tags: {
+        [COMPONENT]: 'cypress',
+        ...testEnvironmentMetadata,
+        ...testModuleSpanMetadata
+      }
+    })
+  })
+
   on('after:run', () => {
+    // todo: update values
+    testModuleSpan.setTag(TEST_STATUS, 'pass')
+    // todo: update values
+    testSessionSpan.setTag(TEST_STATUS, 'pass')
+
+    testModuleSpan.finish()
+    testSessionSpan.finish()
+
     return new Promise(resolve => {
       tracer._tracer._exporter._writer.flush(() => resolve(null))
     })
   })
   on('task', {
+    'dd:testSuiteStart': (suite) => {
+      // todo: update values
+      const testSuiteSpanMetadata = getTestSuiteCommonTags('cypress', '1.0.0', suite)
+      testSuiteSpan = tracer.startSpan('cypress.test_suite', {
+        childOf: testModuleSpan,
+        tags: {
+          [COMPONENT]: 'cypress',
+          ...testEnvironmentMetadata,
+          ...testSuiteSpanMetadata
+        }
+      })
+      return null
+    },
+    'dd:testSuiteFinish': (state) => {
+      testSuiteSpan.setTag(TEST_STATUS, CYPRESS_STATUS_TO_TEST_STATUS[state])
+      testSuiteSpan.finish()
+      return null
+    },
     'dd:beforeEach': (test) => {
       const { testName, testSuite } = test
+
+      const testSuiteTags = {}
+
+      const testSuiteId = testSuiteSpan.context().toSpanId()
+      testSuiteTags[TEST_SUITE_ID] = testSuiteId
+
+      const testSessionId = testSessionSpan.context().toTraceId()
+      testSuiteTags[TEST_SESSION_ID] = testSessionId
+      testSuiteTags[TEST_COMMAND] = command
+
+      const testModuleId = testModuleSpan.context().toSpanId()
+      testSuiteTags[TEST_MODULE_ID] = testModuleId
+      testSuiteTags[TEST_COMMAND] = command
+      testSuiteTags[TEST_BUNDLE] = command
 
       const {
         childOf,
@@ -65,7 +147,8 @@ module.exports = (on, config) => {
             [COMPONENT]: 'cypress',
             [ORIGIN_KEY]: CI_APP_ORIGIN,
             ...testSpanMetadata,
-            ...testEnvironmentMetadata
+            ...testEnvironmentMetadata,
+            ...testSuiteTags
           }
         })
       }
