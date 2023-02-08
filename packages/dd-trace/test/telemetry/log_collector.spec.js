@@ -25,49 +25,62 @@ describe('telemetry log collector', () => {
     })
 
     it('should store logs with same message but different stack', () => {
-      const ddFrame = `at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
+      const ddFrame = `at T (${ddBasePath}packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
       expect(logCollector.add('Error 1', 'ERROR', `stack 1\n${ddFrame}`)).to.be.true
       expect(logCollector.add('Error 1', 'ERROR', `stack 2\n${ddFrame}`)).to.be.true
       expect(logCollector.add('Error 1', 'ERROR', `stack 3\n${ddFrame}`)).to.be.true
     })
 
     it('should store logs with same message, same stack but different level', () => {
-      const ddFrame = `at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
+      const ddFrame = `at T (${ddBasePath}packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
       expect(logCollector.add('Error 1', 'ERROR', `stack 1\n${ddFrame}`)).to.be.true
       expect(logCollector.add('Error 1', 'WARN', `stack 1\n${ddFrame}`)).to.be.true
       expect(logCollector.add('Error 1', 'DEBUG', `stack 1\n${ddFrame}`)).to.be.true
     })
 
     it('should include original message and dd frames', () => {
-      const ddFrame = `at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
+      const ddFrame = `at T (${ddBasePath}packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
       const stack = new Error('Error 1')
         .stack.replace(`Error 1${EOL}`, `Error 1${EOL}${ddFrame}${EOL}`)
       logCollector.add('Error 1', 'ERROR', stack)
+
+      const ddFrames = stack
+        .split(EOL)
+        .filter(line => line.includes(ddBasePath))
+        .map(line => line.replace(ddBasePath, '/'))
 
       const log = logCollector.drain()[0]
       expect(log.message).equal('Error 1')
       expect(log.stack_trace).to.not.be.undefined
 
       log.stack_trace.split(EOL).forEach((frame, index) => {
-        if (index === 0) return
-        expect(frame).to.contain(ddBasePath)
+        if (index !== 0) {
+          expect(ddFrames.indexOf(frame) !== -1).to.be.true
+        }
       })
     })
 
     it('should not include original message if first frame is not a dd frame', () => {
       const thirdPartyFrame = `at callFn (/this/is/not/a/dd/frame/runnable.js:366:21)
-        at T (${ddBasePath}/packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
+        at T (${ddBasePath}packages/dd-trace/test/telemetry/log_collector.spec.js:29:21)`
       const stack = new Error('Error 1')
         .stack.replace(`Error 1${EOL}`, `Error 1${EOL}${thirdPartyFrame}${EOL}`)
 
       logCollector.add('Error 1', 'ERROR', stack)
+
+      const ddFrames = stack
+        .split(EOL)
+        .filter(line => line.includes(ddBasePath))
+        .map(line => line.replace(ddBasePath, '/'))
+
       const log = logCollector.drain()[0]
       expect(log.message).equal('omitted')
       expect(log.stack_trace).to.not.be.undefined
 
       log.stack_trace.split(EOL).forEach((frame, index) => {
-        if (index === 0) return
-        expect(frame).to.contain(ddBasePath)
+        if (index !== 0) {
+          expect(ddFrames.indexOf(frame) !== -1).to.be.true
+        }
       })
     })
   })
