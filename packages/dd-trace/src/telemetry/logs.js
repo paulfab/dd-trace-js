@@ -55,8 +55,12 @@ function sendLogs () {
   }
 }
 
+function notValidConfig (config) {
+  return !config || !config.telemetry || !config.telemetry.logCollection
+}
+
 function start (aConfig, appplicationObject, hostObject, heartbeatInterval) {
-  if (!aConfig.telemetry.logCollection) return
+  if (notValidConfig(aConfig)) return
 
   config = aConfig
   application = appplicationObject
@@ -76,7 +80,7 @@ function start (aConfig, appplicationObject, hostObject, heartbeatInterval) {
 }
 
 function stop () {
-  if (!config || !config.telemetry || !config.telemetry.logCollection) return
+  if (notValidConfig(config)) return
 
   config = null
   application = null

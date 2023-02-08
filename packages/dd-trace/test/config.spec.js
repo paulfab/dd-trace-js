@@ -675,6 +675,45 @@ describe('Config', () => {
     expect(config.telemetry.enabled).to.be.false
   })
 
+  it('should set telemetry default values', () => {
+    const config = new Config()
+
+    expect(config.telemetry).to.not.be.undefined
+    expect(config.telemetry.enabled).to.be.true
+    expect(config.telemetry.logCollection).to.be.true
+    expect(config.telemetry.debug).to.be.false
+  })
+
+  it('should not set DD_TRACE_TELEMETRY_ENABLED', () => {
+    process.env.DD_TRACE_TELEMETRY_ENABLED = 'false'
+
+    const config = new Config()
+
+    expect(config.telemetry.enabled).to.be.false
+
+    delete process.env.DD_TRACE_TELEMETRY_ENABLED
+  })
+
+  it('should set DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED = false', () => {
+    process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED = 'false'
+
+    const config = new Config()
+
+    expect(config.telemetry.logCollection).to.be.false
+
+    delete process.env.DD_INSTRUMENTATION_TELEMETRY_LOG_COLLECTION_ENABLED
+  })
+
+  it('should set DD_TELEMETRY_DEBUG_ENABLED', () => {
+    process.env.DD_TELEMETRY_DEBUG_ENABLED = 'true'
+
+    const config = new Config()
+
+    expect(config.telemetry.debug).to.be.true
+
+    delete process.env.DD_TELEMETRY_DEBUG_ENABLED
+  })
+
   it('should not set DD_REMOTE_CONFIGURATION_ENABLED if AWS_LAMBDA_FUNCTION_NAME is present', () => {
     process.env.AWS_LAMBDA_FUNCTION_NAME = 'my-great-lambda-function'
 
